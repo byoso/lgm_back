@@ -9,6 +9,6 @@ WIP (0%)
 
 ## TODO
 
-- Auth with djor
+- Auth with djoser
 - database
 - API
