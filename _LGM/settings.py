@@ -18,11 +18,13 @@ ENV = os.environ.get('ENV', 'dev')
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+AUTH_USER_MODEL = '_users.User'
 
 CORS_ALLOWED_ORIGINS = [
     # Vue.js site
     "http://localhost:8080",
 ]
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -49,9 +51,9 @@ INSTALLED_APPS = [
     # 3rd party
     'rest_framework',
     'rest_framework.authtoken',
-    'djoser',
 
     # local
+    'django_silly_auth',
     '_users',
     'campain_books',
 ]
@@ -123,11 +125,11 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'fr-FR'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Paris'
 
-USE_I18N = True
+USE_I18N = False
 
 USE_TZ = True
 
@@ -142,8 +144,6 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# REST FRAMEWORK, djoser
-AUTH_USER_MODEL = '_users.User'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -157,11 +157,35 @@ REST_FRAMEWORK = {
 # EMAILs
 if ENV == "prod":
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-else:
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# else:
+#     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 EMAIL_HOST = os.environ.get('EMAIL_HOST') or "localhost"
 EMAIL_PORT = os.environ.get('EMAIL_PORT') or 25
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER') or "email@email.com"
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD') or "testpass"
+
+SILLY_AUTH = {
+    # use the 'create user' endpoint
+    "CREATE_USER": True,
+    # use the login endpoint
+    "LOGIN": True,
+    # use the 'get all users' endpoint, for dev, keep it False in production
+    "GET_ALL_USERS": True,
+    # redirection when login is a success
+    "LOGIN_REDIRECT": None,  # change it to an url
+    # how long the email confirmation links are valid
+    "EMAIL_VALID_TIME": 600,  # seconds
+    # Site name used in emails
+    "SITE_NAME": "My great site",
+    # send a confirmation email when a new user is created
+    "EMAIL_SEND_ACCOUNT_CONFIRM_LINK": True,
+    # After clicking the account confirm link, the account isconfirmed,
+    # and then redirected here:
+    "ACCOUNT_CONFIRMED_REDIRECT": None,  # change it to an url
+    # send an email to ask for password change
+    "EMAIL_SEND_PASSWORD_CHANGE_LINK": True,
+    "PASSWORD_CHANGE_REDIRECT": None,  # change it to an url
+
+}

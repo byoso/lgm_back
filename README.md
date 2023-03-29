@@ -9,6 +9,7 @@ WIP (0%)
 
 ## TODO
 
-- Auth with djoser
+- Auth with djoser => Nope !
+- create an auth package (30%)
 - database
 - API

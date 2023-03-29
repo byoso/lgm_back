@@ -1,0 +1,10 @@
+Dear {{ user.username }},
+
+To confirm your email, click on the following link:
+{{ link }}
+
+If you have not registered an account or reqested an email change,
+please just ignore this message.
+
+
+{{ site_name }}
