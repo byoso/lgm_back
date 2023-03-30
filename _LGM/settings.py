@@ -19,7 +19,6 @@ ENV = os.environ.get('ENV', 'dev')
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 AUTH_USER_MODEL = '_users.User'
-
 CORS_ALLOWED_ORIGINS = [
     # Vue.js site
     "http://localhost:8080",
@@ -30,12 +29,12 @@ CORS_ALLOW_ALL_ORIGINS = True
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-p1qzn=y9%)0yt&mgvc#62*ycmcq6vld+7lik!!ns41fj7*v--b'
+SECRET_KEY = 'django-insecure- change this later'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -162,30 +161,10 @@ if ENV == "prod":
 
 EMAIL_HOST = os.environ.get('EMAIL_HOST') or "localhost"
 EMAIL_PORT = os.environ.get('EMAIL_PORT') or 25
-EMAIL_USE_TLS = True
+EMAIL_USE_TLS = False
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER') or "email@email.com"
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD') or "testpass"
 
 SILLY_AUTH = {
-    # use the 'create user' endpoint
-    "CREATE_USER": True,
-    # use the login endpoint
-    "LOGIN": True,
-    # use the 'get all users' endpoint, for dev, keep it False in production
-    "GET_ALL_USERS": True,
-    # redirection when login is a success
-    "LOGIN_REDIRECT": None,  # change it to an url
-    # how long the email confirmation links are valid
-    "EMAIL_VALID_TIME": 600,  # seconds
-    # Site name used in emails
-    "SITE_NAME": "My great site",
-    # send a confirmation email when a new user is created
-    "EMAIL_SEND_ACCOUNT_CONFIRM_LINK": True,
-    # After clicking the account confirm link, the account isconfirmed,
-    # and then redirected here:
-    "ACCOUNT_CONFIRMED_REDIRECT": None,  # change it to an url
-    # send an email to ask for password change
-    "EMAIL_SEND_PASSWORD_CHANGE_LINK": True,
-    "PASSWORD_CHANGE_REDIRECT": None,  # change it to an url
 
 }

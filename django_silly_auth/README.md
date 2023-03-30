@@ -1,4 +1,4 @@
-# Django Silly Auth
+# Django Silly Auth (WIP 50%)
 
 ## DRF only
 
@@ -14,20 +14,29 @@ pip install django-silly-auth
 
 ### 02 Add the mixin to your user model
 
-**users/models.py** (or wherever is your user model)
-
 Note that you need to have a custom user model created somewhere.
 
-You can add 'AbstractUser' before the mixin if you want, otherwise the
-mixin alone is an 'AbstractBaseUser'.
-
-```
+**users/models.py** (or wherever is your user model)
+```python
 from dango_silly_auth.mixins import SillyAuthUserMixin
 
 class User(SillyAuthUserMixin):
     pass
 
 ```
+
+**Just to let you know, you don't actually need to use this except 'confirmed' :**
+
+The mixin adds 2 attributes:
+
+- confirmed : this is the one you need to check whether an account is confirmed or not. Once set to True, it is not expected to be set back to False.
+Note that it is different from 'is_active' which is related to some other django behaviors.
+- new_email : used by django_silly_auth for email change requests.
+
+and 2 methods:
+
+- get_jwt_token() -> jwt token: used by django_silly_auth
+- verify_jwt_token() -> a user object or None: used by django_silly_auth
 
 ### 03 Settings and urls
 
@@ -50,12 +59,13 @@ REST_FRAMEWORK = {
 
 AUTH_USER_MODEL = '<wherever is your model>.User'
 
-# Optionnal, here are given values are the default ones.
+# Optionnal, here the given values are the default ones.
 SILLY_AUTH = {
     # use the 'create user' endpoint
     "CREATE_USER": True,
     # use the login endpoint
     "LOGIN": True,
+    # use the logout endpoint
     # use the 'get all users' endpoint, for dev, keep it False in production
     "GET_ALL_USERS": False,
     # redirection when login is a success
@@ -64,12 +74,23 @@ SILLY_AUTH = {
     "SITE_NAME": "My great site",
     # send a confirmation email when a new user is created
     "EMAIL_SEND_ACCOUNT_CONFIRM_LINK": True,
+    # how long a verification email will remain valid to use
+    "EMAIL_VALID_TIME": 600,  # seconds
+    # Print the email in the terminal
+    "EMAIL_TERMINAL_PRINT": True,
+    # you may change the basic templates used in the emails
+    "EMAIL_CONFIRM_ACCOUNT_TEMPLATE":
+        "silly_auth/emails/confirm_email.txt",
+    "EMAIL_RESTE_PASSWORD_TEMPLATE":
+        "silly_auth/emails/request_password_reset.txt",
     # After clicking the account confirm link, the account isconfirmed,
     # and then redirected here:
     "ACCOUNT_CONFIRMED_REDIRECT": None, # change it to an url
     # send an email to ask for password change
     "EMAIL_SEND_PASSWORD_CHANGE_LINK": True,
-    "PASSWORD_CHANGE_REDIRECT": None, # change it to an url
+    "CHANGE_PASSWORD_URL": None, # change it to an url
+    # display or not the warnings messages
+    "PRINT_WARNINGS": True,
 }
 
 ```
@@ -88,5 +109,18 @@ You're good to go now !
 <hr>
 
 ## Endpoints
+'auth/' (or wherever you included django_silly_auth.urls) +
 
-auth/token/login/
+|Endpoint | method | form-data | Permission | Effects |
+|---|---|---|---|---|
+| `token/login/` | POST | username, password | | get a jwt token |
+| `token/logout/` | GET |  | IsAuthenticated | force delete token |
+| `users/` | GET | | | get all users (use only for dev) |
+| `confirm_email/<token>/` | GET |  |  | activate from the email link, set user.confirmed to True |
+
+## Autorization with jwt token
+For IsAuthenticated permission add this in your headers:
+
+key: Authorization
+
+value: Token {the token}

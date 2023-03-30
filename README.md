@@ -1,6 +1,6 @@
 # LGM back
 
-WIP (0%)
+WIP (5%)
 
 ## Project ressources
 
@@ -9,7 +9,9 @@ WIP (0%)
 
 ## TODO
 
-- Auth with djoser => Nope !
-- create an auth package (30%)
+
+- create an auth package (70%)
 - database
 - API
+
+- deployment
