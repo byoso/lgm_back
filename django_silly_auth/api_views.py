@@ -5,7 +5,11 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.shortcuts import redirect
 
-from django_silly_auth.serializers import UserSerializer
+from django_silly_auth.serializers import (
+    GetAllUsersSerializer,
+    CreateUserSerializer,
+    PasswordsSerializer
+    )
 from django_silly_auth.config import SILLY_AUTH_SETTINGS as conf
 from django_silly_auth.utils import (
     send_password_reset_email,
@@ -14,6 +18,7 @@ from django_silly_auth.utils import (
 from django_silly_auth.utils import warning
 
 User = get_user_model()
+
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -70,22 +75,9 @@ def reset_password(request, token):
     return Response({'error': 'invalid token'})
 
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def change_password(request):
-    """Changes the user's password"""
-    user = request.user
-    password = request.data.get('password')
-    password2 = request.data.get('password2')
-    if password == password2:
-        user.set_password(password)
-        user.save()
-        return Response({'success': 'password changed'})
-    return Response({'error': 'invalid password'})
-
-
 class UserView(APIView):
     permission_classes = []
+
     def get(self, request, format=None):
         if conf["GET_ALL_USERS"]:
             warning(
@@ -93,18 +85,18 @@ class UserView(APIView):
                 "== True, set it to False in production."
             )
             users = User.objects.all()
-            serializer = UserSerializer(users, many=True)
+            serializer = GetAllUsersSerializer(users, many=True)
             return Response({'users': serializer.data})
         else:
             return Response({'error': 'Not allowed'})
 
     def post(self, request, format=None):
-        serializer = UserSerializer(data=request.data)
+        serializer = CreateUserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
             user.set_password(request.data['password'])
             user.save()
-            serializer = UserSerializer(user)
+            serializer = GetAllUsersSerializer(user)
 
             if conf["EMAIL_SEND_ACCOUNT_CONFIRM_LINK"]:
                 send_confirm_email(request, user)
@@ -112,3 +104,17 @@ class UserView(APIView):
             return Response({'user': serializer.data})
         else:
             return Response({'error': serializer.errors})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def change_password(request):
+    """Changes the user's password"""
+    serializer = PasswordsSerializer(data=request.data)
+    if serializer.is_valid():
+        user = request.user
+        password = request.data.get('password')
+        user.set_password(password)
+        user.save()
+        return Response({'success': 'password changed'})
+    return Response({'error': serializer.errors})
