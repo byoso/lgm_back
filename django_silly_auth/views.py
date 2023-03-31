@@ -5,7 +5,7 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 
 from django_silly_auth.config import SILLY_AUTH_SETTINGS as conf
-from django_silly_auth.forms import ResetPasswordForm
+from django_silly_auth.forms import NewPasswordForm
 
 User = get_user_model()
 
@@ -15,7 +15,7 @@ def reset_password(request, token):
     if not user:
         return HttpResponse('error: invalid token')
     if request.method == 'POST':
-        form = ResetPasswordForm(request.POST)
+        form = NewPasswordForm(request.POST)
         if form.is_valid():
             user.set_password(form.cleaned_data['password'])
             user.is_active = True
@@ -34,7 +34,8 @@ def reset_password(request, token):
         context = {
             "user": user,
             "site_name": conf["SITE_NAME"],
-            "form": ResetPasswordForm()
+            "form": NewPasswordForm(),
+            "base_template": conf["BASE_TEMPLATE"],
         }
         return render(request, conf["RESET_PASSWORD_TEMPLATE"], context)
 
@@ -44,6 +45,7 @@ def password_reset_done(request):
     context = {
         "user": request.user,
         "site_name": conf["SITE_NAME"],
-        "link": conf["RESET_PASSWORD_DONE_URL_TO_SITE"]
+        "link": conf["RESET_PASSWORD_DONE_URL_TO_SITE"],
+        "base_template": conf["BASE_TEMPLATE"],
     }
     return render(request, conf["RESET_PASSWORD_DONE_TEMPLATE"], context)

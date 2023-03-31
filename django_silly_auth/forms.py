@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator, MaxLengthValidator
 
 
-class ResetPasswordForm(forms.Form):
+class NewPasswordForm(forms.Form):
     password = forms.CharField(
         max_length=64, widget=forms.PasswordInput,
         validators=[MinLengthValidator(4), MaxLengthValidator(64)]

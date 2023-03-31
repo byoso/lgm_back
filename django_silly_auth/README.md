@@ -1,4 +1,4 @@
-# Django Silly Auth (WIP 50%)
+# Django Silly Auth
 
 ## DRF only
 
@@ -59,38 +59,59 @@ REST_FRAMEWORK = {
 
 AUTH_USER_MODEL = '<wherever is your model>.User'
 
+
+## Site's email config
+EMAIL_IS_CONFIGURED = False
+
+if EMAIL_IS_CONFIGURED:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# for testing email easily and free: https://mailtrap.io/
+EMAIL_HOST = "mail03.lwspanel.com"
+EMAIL_HOST_USER = "no-reply@xxxxxx.fr"
+EMAIL_HOST_PASSWORD = "xxxxxx"
+EMAIL_PORT = 587
+# TLS/SSL is better on if available, otherwise keep it off
+EMAIL_USE_TLS = False
+
 # Optionnal, here the given values are the default ones.
 SILLY_AUTH = {
-    # use the 'create user' endpoint
-    "CREATE_USER": True,
-    # use the login endpoint
-    "LOGIN": True,
-    # use the logout endpoint
-    # use the 'get all users' endpoint, for dev, keep it False in production
-    "GET_ALL_USERS": False,
-    # redirection when login is a success
-    "LOGIN_REDIRECT": None, # change it to an url
-    # Site name used in emails
-    "SITE_NAME": "My great site",
-    # send a confirmation email when a new user is created
-    "EMAIL_SEND_ACCOUNT_CONFIRM_LINK": True,
-    # how long a verification email will remain valid to use
+    # General settings
+    "SITE_NAME": None,  # str used in templates if provided
+    "GET_ALL_USERS": False,  # True for dev only
+    "PRINT_WARNINGS": True,  # print warnings to terminal
+
+    # emails settings
+    "EMAIL_TERMINAL_PRINT": True,  # print emails to terminal
     "EMAIL_VALID_TIME": 600,  # seconds
-    # Print the email in the terminal
-    "EMAIL_TERMINAL_PRINT": True,
-    # you may change the basic templates used in the emails
+
+    # login / logout
+    "ALLOW_LOGIN_ENDPOINT": True,  # activate this endpoint
+    "LOGIN_REDIRECT": None,
+    "ALLOW_LOGOUT_ENDPOINT": True,  # activate this endpoint
+
+    # account creation
+    "ALLOW_CREATE_USER_ENDPOINT": True,  # activate this endpoint
+    "ALLOW_EMAIL_CONFIRM_ENDPOINT": True,  # activate this endpoint (hook for email link)
+    "EMAIL_SEND_ACCOUNT_CONFIRM_LINK": True,
+    "ACCOUNT_CONFIRMED_REDIRECT": None,
     "EMAIL_CONFIRM_ACCOUNT_TEMPLATE":
         "silly_auth/emails/confirm_email.txt",
-    "EMAIL_RESTE_PASSWORD_TEMPLATE":
+
+    # password reset (forgotten password)
+    "ALLOW_RESET_PASSWORD_ENDPOINT": True,  # activate this endpoint
+    "EMAIL_SEND_PASSWORD_RESET_LINK": True,
+    "EMAIL_RESET_PASSWORD_TEMPLATE":
         "silly_auth/emails/request_password_reset.txt",
-    # After clicking the account confirm link, the account isconfirmed,
-    # and then redirected here:
-    "ACCOUNT_CONFIRMED_REDIRECT": None, # change it to an url
-    # send an email to ask for password change
-    "EMAIL_SEND_PASSWORD_CHANGE_LINK": True,
-    "CHANGE_PASSWORD_URL": None, # change it to an url
-    # display or not the warnings messages
-    "PRINT_WARNINGS": True,
+    #   default frontend are classic django views, you can change it to
+    #   your own views and/or templates
+    "RESET_PASSWORD_ENDPOINT": "auth/password/reset/",
+    "RESET_PASSWORD_TEMPLATE": "silly_auth/reset_password.html",
+    "RESET_PASSWORD_DONE_TEMPLATE": "silly_auth/reset_password_done.html",
+    "RESET_PASSWORD_DONE_URL_TO_SITE": None,  # http:// link to site if provided
+
+
 }
 
 ```

@@ -69,10 +69,21 @@ def reset_password(request, token):
         return Response({'success': 'logged in from email'})
     return Response({'error': 'invalid token'})
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def change_password(request):
+    """Changes the user's password"""
+    user = request.user
+    password = request.data.get('password')
+    password2 = request.data.get('password2')
+    if user.check_password(old_password):
+        user.set_password(password)
+        user.save()
+        return Response({'success': 'password changed'})
+    return Response({'error': 'invalid password'})
 
 class UserView(APIView):
     permission_classes = []
-
     def get(self, request, format=None):
         if conf["GET_ALL_USERS"]:
             warning(

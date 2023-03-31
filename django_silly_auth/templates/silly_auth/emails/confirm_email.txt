@@ -6,5 +6,8 @@ To confirm your email, click on the following link:
 If you have not registered an account or reqested an email change,
 please just ignore this message.
 
+Best regards
 
+{% if site_name %}
 {{ site_name }}
+{% endif %}

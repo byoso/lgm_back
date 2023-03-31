@@ -153,17 +153,23 @@ REST_FRAMEWORK = {
     ),
 }
 
-# EMAILs
-if ENV == "prod":
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# else:
-#     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-EMAIL_HOST = os.environ.get('EMAIL_HOST') or "localhost"
-EMAIL_PORT = os.environ.get('EMAIL_PORT') or 25
-EMAIL_USE_TLS = False
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER') or "email@email.com"
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD') or "testpass"
+## Site's email config
+EMAIL_IS_CONFIGURED = False
+
+if EMAIL_IS_CONFIGURED:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# for testing email easily and free: https://mailtrap.io/
+EMAIL_HOST = "mail03.lwspanel.com"
+EMAIL_HOST_USER = "no-reply@xxxxxx.fr"
+EMAIL_HOST_PASSWORD = "xxxxxx"
+EMAIL_PORT = 587
+# TLS/SSL is better on if available, otherwise keep it off
+EMAIL_USE_TLS = 0
+
+
 
 SILLY_AUTH = {
 
