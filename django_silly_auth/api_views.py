@@ -69,6 +69,7 @@ def reset_password(request, token):
         return Response({'success': 'logged in from email'})
     return Response({'error': 'invalid token'})
 
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def change_password(request):
@@ -76,11 +77,12 @@ def change_password(request):
     user = request.user
     password = request.data.get('password')
     password2 = request.data.get('password2')
-    if user.check_password(old_password):
+    if password == password2:
         user.set_password(password)
         user.save()
         return Response({'success': 'password changed'})
     return Response({'error': 'invalid password'})
+
 
 class UserView(APIView):
     permission_classes = []
