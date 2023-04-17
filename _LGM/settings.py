@@ -18,12 +18,12 @@ ENV = os.environ.get('ENV', 'dev')
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-AUTH_USER_MODEL = '_users.User'
-CORS_ALLOWED_ORIGINS = [
-    # Vue.js site
-    "http://localhost:8080",
-]
-CORS_ALLOW_ALL_ORIGINS = True
+
+# CORS_ALLOWED_ORIGINS = [
+#     # Vue.js site
+#     "http://localhost:8080",
+# ]
+# CORS_ALLOW_ALL_ORIGINS = True
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -50,9 +50,9 @@ INSTALLED_APPS = [
     # 3rd party
     'rest_framework',
     'rest_framework.authtoken',
+    'django_silly_auth',
 
     # local
-    'django_silly_auth',
     '_users',
     'campain_books',
 ]
@@ -128,13 +128,13 @@ LANGUAGE_CODE = 'fr-FR'
 
 TIME_ZONE = 'Europe/Paris'
 
-USE_I18N = False
+USE_I18N = True
 
 USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.1/howto/static-files/
+# https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
 
@@ -148,9 +148,9 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
     ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
-    ),
+    # 'DEFAULT_PERMISSION_CLASSES': (
+    #     'rest_framework.permissions.IsAuthenticated',
+    # ),
 }
 
 
@@ -169,8 +169,10 @@ EMAIL_PORT = 587
 # TLS/SSL is better on if available, otherwise keep it off
 EMAIL_USE_TLS = 0
 
-
+AUTH_USER_MODEL = '_users.User'
 
 SILLY_AUTH = {
+    "AUTO_SET": "SPA",
+    "SPA_EMAIL_LOGIN_LINK": "http://localhost:8080/login_jwt/",
 
 }
