@@ -18,12 +18,12 @@ ENV = os.environ.get('ENV', 'dev')
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# CORS_ALLOWED_ORIGINS = [
-#     # Vue.js site
-#     "http://localhost:8080",
-# ]
-# CORS_ALLOW_ALL_ORIGINS = True
+# for vue.js spa development
+CORS_ALLOWED_ORIGINS = [
+    # Vue.js site
+    "http://localhost:8080",
+]
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -173,6 +173,6 @@ AUTH_USER_MODEL = '_users.User'
 
 SILLY_AUTH = {
     "AUTO_SET": "SPA",
-    "SPA_EMAIL_LOGIN_LINK": "http://localhost:8080/login_jwt/",
+    "SPA_EMAIL_LOGIN_LINK": "http://localhost:8080/?#/login_from_email/",
 
 }

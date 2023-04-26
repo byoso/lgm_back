@@ -18,6 +18,9 @@ class Table(models.Model):
     def __str__(self):
         return f"<Table: {self.name}>"
 
+    def perform_create(self, serializer):
+        serializer.save(owners=self.request.user)
+
 
 class Item(models.Model):
     TYPE_CHOICES = (
@@ -120,3 +123,11 @@ class CampainTemplate(AbstractCampain):
 
     def __str__(self):
         return f"<CampainTemplate: {self.name}>"
+
+
+class Guest(models.Model):
+    email = models.EmailField(max_length=63, unique=True)
+    tables = models.ManyToManyField(to=Table, related_name='guests')
+
+    def __str__(self):
+        return f"<Guest: {self.name}>"
