@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.validators import MinLengthValidator, MaxLengthValidator
@@ -5,13 +7,23 @@ from django.utils.translation import gettext_lazy as _
 
 
 class Table(models.Model):
-    name = models.CharField(max_length=63, blank=True, null=True)
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
+    name = models.CharField(max_length=63)
     owners = models.ManyToManyField(
         to=get_user_model(),
         related_name='tables_owned',
+        blank=True,
     )
     description = models.TextField(blank=True, null=True)
-    users = models.ManyToManyField(to=get_user_model(), related_name='tables')
+    users = models.ManyToManyField(
+        to=get_user_model(),
+        related_name='tables',
+        blank=True,
+        )
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
 
@@ -32,6 +44,11 @@ class Item(models.Model):
         ('note', _('Note')),
     )
 
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
     name = models.CharField(max_length=63, blank=True, null=True)
     image_url = models.CharField(max_length=255, blank=True, null=True)
     author = models.CharField(max_length=63, blank=True, null=True)
@@ -51,6 +68,11 @@ class Item(models.Model):
 
 
 class AbstractCampain(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
     title = models.CharField(
         max_length=63,
         blank=True, null=True,
@@ -71,6 +93,11 @@ class AbstractCampain(models.Model):
 
 
 class Campain(AbstractCampain):
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
     game_masters = models.ManyToManyField(to=get_user_model(), related_name='campains_gm')
     ended = models.BooleanField(default=False)
 
@@ -79,6 +106,11 @@ class Campain(AbstractCampain):
 
 
 class PlayerCharacter(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
     user = models.ForeignKey(to=get_user_model(), on_delete=models.CASCADE, related_name='pcs')
     character_name = models.CharField(max_length=63)
     campain = models.ForeignKey(to=Campain, on_delete=models.CASCADE, related_name='pcs')
@@ -115,6 +147,11 @@ class CampainTemplate(AbstractCampain):
         (9, '9'),
         (10, '10'),
     )
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
     author = models.ForeignKey(to=get_user_model(), on_delete=models.DO_NOTHING, related_name='books')
     game = models.CharField(max_length=63, choices=GAMES)
     rating = models.IntegerField(blank=True, null=True, choices=RATINGS)
@@ -126,6 +163,11 @@ class CampainTemplate(AbstractCampain):
 
 
 class Guest(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
     email = models.EmailField(max_length=63, unique=True)
     tables = models.ManyToManyField(to=Table, related_name='guests')
 
