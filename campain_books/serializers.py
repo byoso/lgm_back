@@ -3,10 +3,13 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import Table
 
+from django_silly_auth.serializers import UserInfosSerializer
+
 User = get_user_model()
 
 
 class TableSerializer(ModelSerializer):
+    owners = UserInfosSerializer(read_only=True, many=True)
     class Meta:
         model = Table
         fields = '__all__'

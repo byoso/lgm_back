@@ -174,5 +174,9 @@ AUTH_USER_MODEL = '_users.User'
 SILLY_AUTH = {
     "AUTO_SET": "SPA",
     "SPA_EMAIL_LOGIN_LINK": "http://localhost:8080/?#/login_from_email/",
+    "USER_INFOS_EXCLUDE": [
+        'password', 'is_superuser', 'is_staff', 'is_active', 'new_email',
+        'groups', 'user_permissions', 'last_login', 'is_confirmed',
+    ]
 
 }

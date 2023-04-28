@@ -50,12 +50,12 @@ def get_tables_as_user(request):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def show_table(request):
-    data = [dict()]
-    tables = Table.objects.filter(owners=request.user)
-    serializer = TableSerializer(tables, many=True)
-    data[0]["tables_as_owner"] = serializer.data
+def show_tables(request):
+    data = dict()
+    tables_as_owner = Table.objects.filter(owners=request.user)
+    serializer = TableSerializer(tables_as_owner, many=True)
+    data["tables_as_owner"] = serializer.data
 
-    data[0]["additionnal_data"] = "some data"
+    data["additionnal_data"] = "some data"
     # data.append({"additionnal_data": "some data"})
     return Response(data)
