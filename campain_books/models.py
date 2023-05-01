@@ -19,11 +19,12 @@ class Table(models.Model):
         blank=True,
     )
     description = models.TextField(blank=True, null=True)
-    users = models.ManyToManyField(
-        to=get_user_model(),
+    guests = models.ManyToManyField(
+        to="Guest",
         related_name='tables',
         blank=True,
         )
+    table_password = models.CharField(max_length=63, blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
 
@@ -169,7 +170,18 @@ class Guest(models.Model):
         editable=False,
     )
     email = models.EmailField(max_length=63, unique=True)
-    tables = models.ManyToManyField(to=Table, related_name='guests')
+    user = models.OneToOneField(
+        to=get_user_model(),
+        on_delete=models.DO_NOTHING,
+        related_name='guest',
+        blank=True, null=True)
 
     def __str__(self):
         return f"<Guest: {self.name}>"
+
+    @property
+    def is_valid_user(self):
+        if self.user is not None and self.user.is_active and \
+                self.user.is_confirmed:
+            return True
+        return False
