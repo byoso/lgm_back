@@ -1,24 +1,17 @@
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Table, Guest
+from .models import Table
 
 from django_silly_auth.serializers import UserInfosSerializer
 
 User = get_user_model()
 
 
-class GuestSerializer(ModelSerializer):
-    user = UserInfosSerializer(read_only=True, many=True)
-
-    class Meta:
-        model = Guest
-        fields = '__all__'
-
-
 class TableSerializer(ModelSerializer):
+    # TODO: (or not) maybe change the serializer for a more specific one
     owners = UserInfosSerializer(read_only=True, many=True)
-    guests = GuestSerializer(read_only=True, many=True)
+    guests = UserInfosSerializer(read_only=True, many=True)
 
     class Meta:
         model = Table

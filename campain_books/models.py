@@ -5,6 +5,8 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MinLengthValidator, MaxLengthValidator
 from django.utils.translation import gettext_lazy as _
 
+User = get_user_model()
+
 
 class Table(models.Model):
     id = models.UUIDField(
@@ -14,13 +16,13 @@ class Table(models.Model):
     )
     name = models.CharField(max_length=63)
     owners = models.ManyToManyField(
-        to=get_user_model(),
+        to=User,
         related_name='tables_owned',
         blank=True,
     )
     description = models.TextField(blank=True, null=True)
     guests = models.ManyToManyField(
-        to="Guest",
+        to=User,
         related_name='tables',
         blank=True,
         )
@@ -161,27 +163,3 @@ class CampainTemplate(AbstractCampain):
 
     def __str__(self):
         return f"<CampainTemplate: {self.name}>"
-
-
-class Guest(models.Model):
-    id = models.UUIDField(
-        primary_key=True,
-        default=uuid.uuid4,
-        editable=False,
-    )
-    email = models.EmailField(max_length=63, unique=True)
-    user = models.OneToOneField(
-        to=get_user_model(),
-        on_delete=models.DO_NOTHING,
-        related_name='guest',
-        blank=True, null=True)
-
-    def __str__(self):
-        return f"<Guest: {self.name}>"
-
-    @property
-    def is_valid_user(self):
-        if self.user is not None and self.user.is_active and \
-                self.user.is_confirmed:
-            return True
-        return False
