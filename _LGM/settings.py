@@ -172,6 +172,7 @@ EMAIL_USE_TLS = 0
 AUTH_USER_MODEL = '_users.User'
 
 SILLY_AUTH = {
+    "SITE_NAME": "RPGAdventure.eu",
     "AUTO_SET": "SPA",
     "SPA_EMAIL_LOGIN_LINK": "http://localhost:8080/?#/login_from_email/",
     "USER_INFOS_EXCLUDE": [

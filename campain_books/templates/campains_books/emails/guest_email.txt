@@ -1,15 +1,19 @@
 {% load i18n %}
 
 
+
 {% blocktrans %}
 
-A guest account have been created for you{% if site_name %} on {{ site_name }}{% endif %}.
+Hello !
+
+'{{ table_host_name }}' have created a guest account for you, you are invited to
+join his table '{{ table_name }}'.
 
 
 To confirm your email, please click on the following link:
 {{ link }}
 
-If you have not registered an account,
+If you don't expect this invitation from {{ table_host_name }},
 please just ignore this message.
 
 Best regards
