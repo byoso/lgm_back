@@ -29,6 +29,9 @@ def create_table(request):
         message = ""
         for guest_email in request.data.get('guests'):
             if not User.objects.filter(email=guest_email).exists():
+                if "@" not in guest_email or len(guest_email) < 5:
+                    message += f"Impossible to create this guest: {guest_email}.\n"
+                    continue
                 try:
                     guest = User.objects.create_user(
                         email=guest_email,
@@ -60,7 +63,6 @@ def create_table(request):
                     message += f"Impossible to create this guest: {guest_email}.\n"
                     print(e)
 
-                # send email for confirmation and invitation notification
             else:
                 guest = User.objects.get(email=guest_email)
             table.guests.add(guest)
