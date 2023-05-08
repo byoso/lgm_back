@@ -3,7 +3,6 @@ import uuid
 from django.contrib.auth import get_user_model
 from django.template.loader import get_template
 from django.conf import settings
-from rest_framework.response import Response
 
 from django_silly_auth.utils import dsa_send_mail
 from django_silly_auth.config import SILLY_AUTH_SETTINGS as conf
@@ -20,8 +19,9 @@ def guests_create_or_not(
         *args, **kwargs
         ):
 
+    table.guests.clear()
+
     for guest_email in guests_list:
-        print(guest_email)
         if not User.objects.filter(email=guest_email).exists():
             if "@" not in guest_email or len(guest_email) < 5:
                 message += f"Impossible to create this guest: {guest_email}.\n"

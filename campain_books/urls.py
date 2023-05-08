@@ -1,11 +1,17 @@
-from django.contrib import admin
-from django.urls import path
-from django.conf.urls import include
+
+from django.urls import path, include
+
+from rest_framework.routers import DefaultRouter
 
 from . import views
 
+router = DefaultRouter()
+router.register('tables', views.TableViewSet, basename='tables')
+
+
 urlpatterns = [
-    path('tables/create/', views.create_table, name='create_table'),
+    path('', include(router.urls)),
+    # path('tables/create/', views.create_table, name='create_table'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('get_tables_as_owner/', views.get_tables_as_owner, name='get_tables_as_owner'),
     path('get_tables_as_user/', views.get_tables_as_user, name='get_tables_as_user'),

@@ -18,26 +18,6 @@ from .helpers import guests_create_or_not
 User = get_user_model()
 
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def create_table(request):
-    serializer = TableSerializer(
-                    data=request.data,
-                    )
-    if serializer.is_valid():
-        table = serializer.save()
-        table.owners.add(request.user)
-
-        response_datas = guests_create_or_not(
-            request,
-            guests_list=request.data.get('guests'),
-            table=table, message="",
-            serializer=serializer,
-            )
-        return Response(response_datas)
-    raise ValidationError(serializer.errors)
-
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_tables_as_owner(request):
@@ -77,18 +57,42 @@ def get_table_datas(request):
     raise ValidationError("This table does not exists")
 
 
-# class TableViewSet(viewsets.ModelViewSet):
-#     """Handle actions on tables but"""
-#     queryset = Table.objects.all()
-#     serializer_class = TableSerializer
-#     permission_classes = [IsAuthenticated]
+class TableViewSet(viewsets.ModelViewSet):
+    """Handle actions on tables but"""
+    queryset = Table.objects.all()
+    serializer_class = TableSerializer
+    permission_classes = [IsAuthenticated]
 
-#     def get_queryset(self):
-#         user = self.request.user
-#         return Table.objects.filter(owners=user)
+    def get_queryset(self):
+        user = self.request.user
+        return Table.objects.filter(owners=user)
 
-#     def perform_update(self, serializer):
-#         serializer.save(owners=[self.request.user])
+    def perform_create(self, serializer):
+        if serializer.is_valid():
+            table = serializer.save()
+            table.owners.add(self.request.user)
 
-#     def perform_destroy(self, instance):
-#         instance.delete()
+            response_datas = guests_create_or_not(
+                self.request,
+                guests_list=self.request.data.get('guests'),
+                table=table, message="",
+                serializer=serializer,
+                )
+            return Response(response_datas)
+        raise ValidationError(serializer.errors)
+
+    def perform_update(self, serializer):
+        if serializer.is_valid():
+            table = serializer.save()
+
+            response_datas = guests_create_or_not(
+                self.request,
+                guests_list=self.request.data.get('guests'),
+                table=table, message="",
+                serializer=serializer,
+                )
+            return Response(response_datas)
+        raise ValidationError(serializer.errors)
+
+    def perform_destroy(self, instance):
+        instance.delete()

@@ -19,10 +19,10 @@ ENV = os.environ.get('ENV', 'dev')
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # for vue.js spa development
-CORS_ALLOWED_ORIGINS = [
-    # Vue.js site
-    "http://localhost:8080",
-]
+# CORS_ALLOWED_ORIGINS = [
+#     # Vue.js site
+#     "http://localhost:8080",
+# ]
 CORS_ALLOW_ALL_ORIGINS = True
 
 # Quick-start development settings - unsuitable for production
@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # 3rd party
+    'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
     'django_silly_auth',
@@ -58,9 +59,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
