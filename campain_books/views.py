@@ -12,7 +12,7 @@ from rest_framework import viewsets
 
 from .models import Table
 from .serializers import TableSerializer
-from .permissions import is_owner
+from .permissions import IsOwner, IsGuestOrOwner
 from .helpers import guests_create_or_not
 
 User = get_user_model()
@@ -39,9 +39,12 @@ def dashboard(request):
     data = dict()
     tables_as_owner = Table.objects.filter(owners=request.user)
     serializer = TableSerializer(tables_as_owner, many=True)
-    data["tables_as_owner"] = serializer.data
+    tables_as_guest = Table.objects.filter(guests=request.user)
+    serializer2 = TableSerializer(tables_as_guest, many=True)
 
-    data["additionnal_data"] = "some data"
+    data["tables_as_owner"] = serializer.data
+    data["tables_as_guest"] = serializer2.data
+
     return Response(data)
 
 
@@ -61,7 +64,7 @@ class TableViewSet(viewsets.ModelViewSet):
     """Handle actions on tables but"""
     queryset = Table.objects.all()
     serializer_class = TableSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsGuestOrOwner]
 
     def get_queryset(self):
         user = self.request.user
