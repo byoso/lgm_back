@@ -8,4 +8,4 @@ class User(
     SillyAuthUserMixin,
     AbstractUser
         ):
-    pass
+    is_subscriber = models.BooleanField(default=False)

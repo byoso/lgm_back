@@ -1,6 +1,12 @@
 from rest_framework import permissions
 
 
+class IsSubscriber(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        return request.user.is_subscriber
+
+
 class IsOwner(permissions.BasePermission):
 
     message = "You must be the owner of this resource to perform this action."

@@ -179,6 +179,6 @@ SILLY_AUTH = {
     "USER_INFOS_EXCLUDE": [
         'password', 'is_superuser', 'is_staff', 'is_active', 'new_email',
         'groups', 'user_permissions', 'last_login', 'is_confirmed',
+        'first_name', 'last_name',
     ]
-
 }
