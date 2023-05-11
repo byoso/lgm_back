@@ -16,4 +16,6 @@ urlpatterns = [
     path('get_tables_as_owner/', views.get_tables_as_owner, name='get_tables_as_owner'),
     path('get_tables_as_user/', views.get_tables_as_user, name='get_tables_as_user'),
     path('get_table_datas/', views.get_table_datas, name='get_table_datas'),
+    path('switch_guest_owner/', views.switch_guest_owner, name='switch_guest_owner'),
+    path('get_games_list/', views.get_games_list, name='get_games_list'),
 ]

@@ -10,7 +10,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework import viewsets
 
 
-from .models import Table
+from .models import Table, GAMES
 from .serializers import TableSerializer
 from .permissions import IsOwner, IsGuestOrOwner
 from .helpers import guests_create_or_not
@@ -51,8 +51,6 @@ def dashboard(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_table_datas(request):
-    id = request.GET.get('table_id')
-    print("====== ID: ", id)
     if Table.objects.filter(id=request.GET.get('table_id')).exists():
         table = Table.objects.get(id=request.GET.get('table_id'))
         serializer = TableSerializer(table)
@@ -99,3 +97,34 @@ class TableViewSet(viewsets.ModelViewSet):
 
     def perform_destroy(self, instance):
         instance.delete()
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated, IsOwner])
+def switch_guest_owner(request):
+    print("=== table id: ", request.data.get('table_id'))
+    print(request.POST)
+    table = Table.objects.get(id=request.data.get('table_id'))
+    user = User.objects.get(id=request.data.get('user_id'))
+    message = ""
+    if user in table.owners.all() and table.owners.count() > 1:
+        table.owners.remove(user)
+        table.guests.add(user)
+        message = f"user { user.username } switched to guest"
+    elif user in table.guests.all():
+        table.guests.remove(user)
+        table.owners.add(user)
+        message = f"user { user.username } switched to owner"
+    else:
+        raise ValidationError("Impossible to perform this action.")
+    serializer = TableSerializer(table)
+    return Response({"message": message, "table": serializer.data})
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_games_list(request):
+    games = {}
+    for game in GAMES:
+        games[game[0]] = game[1]
+    return Response(games)

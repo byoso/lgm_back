@@ -8,6 +8,22 @@ from django.utils.translation import gettext_lazy as _
 User = get_user_model()
 
 
+GAMES = (
+    ('misc', _('Miscellaneous')),
+    ('DnD', _('Dungeons & Dragons')),
+    ('LGM', _('Le Grand Monde')),
+    ('SWd6', _('Star Wars d6')),
+    ('SWd20', _('Star Wars d20')),
+    ('NOC', _('NOC')),
+    ('DH', _('Dark Heresy')),
+    ('WH', _('Warhammer')),
+    ('INS/MV', _('In Nomine Satanis/Magna Veritas')),
+    ('Cthulhu', _('Call of Cthulhu')),
+    ('Vampire', _('Vampire')),
+    ('critical', _('Critical')),
+)
+
+
 class Table(models.Model):
     id = models.UUIDField(
         primary_key=True,
@@ -101,8 +117,18 @@ class Campain(AbstractCampain):
         default=uuid.uuid4,
         editable=False,
     )
-    game_masters = models.ManyToManyField(to=get_user_model(), related_name='campains_gm')
-    ended = models.BooleanField(default=False)
+    game_master = models.ForeignKey(
+        to=get_user_model(),
+        related_name='campain_gm',
+        on_delete=models.CASCADE,
+        blank=True, null=True,
+        )
+    players = models.ManyToManyField(
+        to=get_user_model(),
+        related_name='campains',
+        blank=True,
+        )
+    is_ended = models.BooleanField(default=False)
 
     def __str__(self):
         return f"<Campain: {self.name}>"
@@ -116,6 +142,7 @@ class PlayerCharacter(models.Model):
     )
     user = models.ForeignKey(to=get_user_model(), on_delete=models.CASCADE, related_name='pcs')
     character_name = models.CharField(max_length=63)
+    # TODO: change for MtM:
     campain = models.ForeignKey(to=Campain, on_delete=models.CASCADE, related_name='pcs')
     description = models.TextField(blank=True, null=True)
 
@@ -124,20 +151,6 @@ class PlayerCharacter(models.Model):
 
 
 class CampainTemplate(AbstractCampain):
-    GAMES = (
-        ('misc', _('Miscellaneous')),
-        ('DnD', _('Dungeons & Dragons')),
-        ('LGM', _('Le Grand Monde')),
-        ('SWd6', _('Star Wars d6')),
-        ('SWd20', _('Star Wars d20')),
-        ('NOC', _('NOC')),
-        ('DH', _('Dark Heresy')),
-        ('WH', _('Warhammer')),
-        ('INS/MV', _('In Nomine Satanis/Magna Veritas')),
-        ('Cthulhu', _('Call of Cthulhu')),
-        ('Vampire', _('Vampire')),
-        ('critical', _('Critical')),
-    )
     RATINGS = (
         (1, '1'),
         (2, '2'),
