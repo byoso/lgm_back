@@ -8,20 +8,23 @@ from django.utils.translation import gettext_lazy as _
 User = get_user_model()
 
 
-GAMES = (
-    ('misc', _('Miscellaneous')),
-    ('DnD', _('Dungeons & Dragons')),
-    ('LGM', _('Le Grand Monde')),
-    ('SWd6', _('Star Wars d6')),
-    ('SWd20', _('Star Wars d20')),
-    ('NOC', _('NOC')),
-    ('DH', _('Dark Heresy')),
-    ('WH', _('Warhammer')),
-    ('INS/MV', _('In Nomine Satanis/Magna Veritas')),
-    ('Cthulhu', _('Call of Cthulhu')),
-    ('Vampire', _('Vampire')),
-    ('critical', _('Critical')),
-)
+class Game(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
+    name = models.CharField(max_length=63)
+    description = models.TextField(max_length=255, blank=True, null=True)
+    image_url = models.CharField(max_length=255, blank=True, null=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"<Game: {self.name}>"
+
+    def perform_create(self, serializer):
+        serializer.save(owners=self.request.user)
 
 
 class Table(models.Model):
@@ -125,29 +128,17 @@ class Campain(AbstractCampain):
         )
     players = models.ManyToManyField(
         to=get_user_model(),
-        related_name='campains',
+        related_name='player_campains',
         blank=True,
         )
     is_ended = models.BooleanField(default=False)
+    game = models.ForeignKey(
+        Game, on_delete=models.PROTECT,
+        related_name='game_campains',
+        blank=True, null=True)
 
     def __str__(self):
         return f"<Campain: {self.name}>"
-
-
-class PlayerCharacter(models.Model):
-    id = models.UUIDField(
-        primary_key=True,
-        default=uuid.uuid4,
-        editable=False,
-    )
-    user = models.ForeignKey(to=get_user_model(), on_delete=models.CASCADE, related_name='pcs')
-    character_name = models.CharField(max_length=63)
-    # TODO: change for MtM:
-    campain = models.ForeignKey(to=Campain, on_delete=models.CASCADE, related_name='pcs')
-    description = models.TextField(blank=True, null=True)
-
-    def __str__(self):
-        return f"<PlayerCharacter: {self.name}>"
 
 
 class CampainTemplate(AbstractCampain):
@@ -168,11 +159,33 @@ class CampainTemplate(AbstractCampain):
         default=uuid.uuid4,
         editable=False,
     )
-    author = models.ForeignKey(to=get_user_model(), on_delete=models.DO_NOTHING, related_name='books')
-    game = models.CharField(max_length=63, choices=GAMES)
+    author = models.ForeignKey(to=get_user_model(), on_delete=models.PROTECT, related_name='books')
     rating = models.IntegerField(blank=True, null=True, choices=RATINGS)
     played_times = models.IntegerField(default=0)
-    master = models.OneToOneField(to='Campain', on_delete=models.DO_NOTHING, related_name='template')
+    master = models.OneToOneField(to='Campain', on_delete=models.PROTECT, related_name='template')
+    game = models.ForeignKey(
+        Game, on_delete=models.PROTECT,
+        related_name='campains',
+        blank=True, null=True)
 
     def __str__(self):
         return f"<CampainTemplate: {self.name}>"
+
+
+class PlayerCharacter(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
+    user = models.ForeignKey(to=get_user_model(), on_delete=models.CASCADE, related_name='characters')
+    character_name = models.CharField(max_length=63, null=True, blank=True)
+    campains = models.ManyToManyField(
+        to=Campain,
+        related_name='campain_characters',
+        blank=True,
+        )
+    description = models.TextField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return f"<PlayerCharacter: {self.name}>"

@@ -1,17 +1,18 @@
 import uuid
 
+from django.db.models import Q
 from django.contrib.auth import get_user_model
 from django.template.loader import get_template
 from django.conf import settings
+
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ValidationError
 from rest_framework import viewsets
 
-
-from .models import Table, GAMES
-from .serializers import TableSerializer
+from .models import Table, Game, Campain, PlayerCharacter
+from .serializers import TableSerializer, GameSerializer, PlayerCharacterSerializer, CampainSerializer
 from .permissions import IsOwner, IsGuestOrOwner
 from .helpers import guests_create_or_not
 
@@ -124,7 +125,33 @@ def switch_guest_owner(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_games_list(request):
-    games = {}
-    for game in GAMES:
-        games[game[0]] = game[1]
-    return Response(games)
+    serializer = GameSerializer(Game.objects.all(), many=True)
+    return Response(serializer.data)
+
+
+class CampainViewSet(viewsets.ModelViewSet):
+    """Handle actions on campains"""
+    queryset = Campain.objects.all()
+    serializer_class = CampainSerializer
+    permission_classes = [IsAuthenticated, IsOwner]
+
+    def get_queryset(self):
+        user = self.request.user
+        campains = Campain.objects.filter(
+            Q(table__owners=user) | Q(table__guests=user))
+        return campains
+
+    def perform_create(self, serializer):
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        raise ValidationError(serializer.errors)
+
+    def perform_update(self, serializer):
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        raise ValidationError(serializer.errors)
+
+    def perform_destroy(self, instance):
+        instance.delete()

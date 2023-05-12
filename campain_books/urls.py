@@ -4,6 +4,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from . import views
+from .populate import populate
 
 router = DefaultRouter()
 router.register('tables', views.TableViewSet, basename='tables')
@@ -19,3 +20,5 @@ urlpatterns = [
     path('switch_guest_owner/', views.switch_guest_owner, name='switch_guest_owner'),
     path('get_games_list/', views.get_games_list, name='get_games_list'),
 ]
+
+populate()
