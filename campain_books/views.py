@@ -129,29 +129,35 @@ def get_games_list(request):
     return Response(serializer.data)
 
 
-class CampainViewSet(viewsets.ModelViewSet):
+class CampainViewSet(viewsets.ViewSet):
     """Handle actions on campains"""
-    queryset = Campain.objects.all()
-    serializer_class = CampainSerializer
-    permission_classes = [IsAuthenticated, IsOwner]
 
-    def get_queryset(self):
-        user = self.request.user
-        campains = Campain.objects.filter(
-            Q(table__owners=user) | Q(table__guests=user))
-        return campains
-
-    def perform_create(self, serializer):
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        raise ValidationError(serializer.errors)
-
-    def perform_update(self, serializer):
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        raise ValidationError(serializer.errors)
-
-    def perform_destroy(self, instance):
-        instance.delete()
+    def create(self, request):
+        pcs = request.data['pcs']
+        campain = Campain.objects.create(
+            title=request.data['title'],
+            game_master=User.objects.get(id=request.data['master']),
+            game=Game.objects.get(id=request.data['game_id']),
+            )
+        for pc in pcs.values():
+            if not User.objects.filter(id=pc['id']).exists():
+                raise ValidationError(f"User {pc['id']} does not exists")
+            user = User.objects.get(id=pc['id'])
+            if pc['name'] == "":
+                print("pc: ", user.username)
+                pc_name = user.username
+            else:
+                print("pc: ", pc['name'])
+                pc_name = pc['name']
+            pc = PlayerCharacter.objects.create(
+                character_name=pc_name, user=user, )
+            pc.campains.add(campain)
+            pc.save()
+        # campain_serializer = CampainSerializer(data=request.data)
+        # pcs_serializer = PlayerCharacterSerializer(data=request.data.get('pcs'), many=True)
+        # if campain_serializer.is_valid() and pcs_serializer.is_valid():
+        #     campain = campain_serializer.save()
+        #     pcs_serializer.save(campain=campain)
+        #     return Response(campain_serializer.data)
+        # raise ValidationError(campain_serializer.errors)
+        return Response({"message": "ok"})

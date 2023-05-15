@@ -8,6 +8,7 @@ from .populate import populate
 
 router = DefaultRouter()
 router.register('tables', views.TableViewSet, basename='tables')
+router.register('campains', views.CampainViewSet, basename='campains')
 
 
 urlpatterns = [

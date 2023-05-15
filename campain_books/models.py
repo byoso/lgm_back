@@ -20,6 +20,11 @@ class Game(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        verbose_name = _('Game')
+        verbose_name_plural = _('Games')
+        ordering = ['name']
+
     def __str__(self):
         return f"<Game: {self.name}>"
 
@@ -135,6 +140,11 @@ class Campain(AbstractCampain):
     game = models.ForeignKey(
         Game, on_delete=models.PROTECT,
         related_name='game_campains',
+        blank=True, null=True)
+
+    table = models.ForeignKey(
+        Table, on_delete=models.PROTECT,
+        related_name='table_campains',
         blank=True, null=True)
 
     def __str__(self):
