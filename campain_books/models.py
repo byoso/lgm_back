@@ -126,14 +126,14 @@ class Campain(AbstractCampain):
         editable=False,
     )
     game_master = models.ForeignKey(
-        to=get_user_model(),
+        to="PlayerCharacter",
         related_name='campain_gm',
         on_delete=models.CASCADE,
         blank=True, null=True,
         )
-    players = models.ManyToManyField(
-        to=get_user_model(),
-        related_name='player_campains',
+    pcs = models.ManyToManyField(
+        to="PlayerCharacter",
+        related_name='pc_campains',
         blank=True,
         )
     is_ended = models.BooleanField(default=False)
@@ -145,7 +145,7 @@ class Campain(AbstractCampain):
     table = models.ForeignKey(
         Table, on_delete=models.PROTECT,
         related_name='table_campains',
-        blank=True, null=True)
+        )
 
     def __str__(self):
         return f"<Campain: {self.name}>"

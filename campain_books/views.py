@@ -133,11 +133,13 @@ class CampainViewSet(viewsets.ViewSet):
     """Handle actions on campains"""
 
     def create(self, request):
+        print("=== datas: ", request.data, " ===\n")
         pcs = request.data['pcs']
         campain = Campain.objects.create(
             title=request.data['title'],
-            game_master=User.objects.get(id=request.data['master']),
             game=Game.objects.get(id=request.data['game_id']),
+            table=Table.objects.get(id=request.data['table_id']),
+            description=request.data['description'],
             )
         for pc in pcs.values():
             if not User.objects.filter(id=pc['id']).exists():
@@ -149,15 +151,22 @@ class CampainViewSet(viewsets.ViewSet):
             else:
                 print("pc: ", pc['name'])
                 pc_name = pc['name']
-            pc = PlayerCharacter.objects.create(
+
+            new_pc = PlayerCharacter.objects.create(
                 character_name=pc_name, user=user, )
-            pc.campains.add(campain)
-            pc.save()
-        # campain_serializer = CampainSerializer(data=request.data)
-        # pcs_serializer = PlayerCharacterSerializer(data=request.data.get('pcs'), many=True)
-        # if campain_serializer.is_valid() and pcs_serializer.is_valid():
-        #     campain = campain_serializer.save()
-        #     pcs_serializer.save(campain=campain)
-        #     return Response(campain_serializer.data)
-        # raise ValidationError(campain_serializer.errors)
+            new_pc.campains.add(campain)
+            new_pc.save()
+            print("=== new_pc.user.id : ", new_pc.user.id)
+            if str(new_pc.user.id) == request.data['master_id']:
+                campain.game_master = new_pc
+                campain.save()
         return Response({"message": "ok"})
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated, IsOwner])
+def get_campains_for_table(request):
+    table = Table.objects.get(id=request.GET.get('table_id'))
+    campains = table.table_campains.all()
+    serializer = CampainSerializer(campains, many=True)
+    return Response(serializer.data)

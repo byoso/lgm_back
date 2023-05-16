@@ -20,6 +20,7 @@ urlpatterns = [
     path('get_table_datas/', views.get_table_datas, name='get_table_datas'),
     path('switch_guest_owner/', views.switch_guest_owner, name='switch_guest_owner'),
     path('get_games_list/', views.get_games_list, name='get_games_list'),
+    path('get_campains_for_table/', views.get_campains_for_table, name='get_campains_for_table'),
 ]
 
 populate()
