@@ -14,7 +14,7 @@ class Game(models.Model):
         default=uuid.uuid4,
         editable=False,
     )
-    name = models.CharField(max_length=63)
+    name = models.CharField(max_length=31)
     description = models.TextField(max_length=255, blank=True, null=True)
     image_url = models.CharField(max_length=255, blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
@@ -38,7 +38,7 @@ class Table(models.Model):
         default=uuid.uuid4,
         editable=False,
     )
-    name = models.CharField(max_length=63)
+    name = models.CharField(max_length=31)
     owners = models.ManyToManyField(
         to=User,
         related_name='tables_owned',
@@ -50,7 +50,7 @@ class Table(models.Model):
         related_name='tables',
         blank=True,
         )
-    table_password = models.CharField(max_length=63, blank=True, null=True)
+    table_password = models.CharField(max_length=31, blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
 
@@ -76,9 +76,9 @@ class Item(models.Model):
         default=uuid.uuid4,
         editable=False,
     )
-    name = models.CharField(max_length=63, blank=True, null=True)
+    name = models.CharField(max_length=31, blank=True, null=True)
     image_url = models.CharField(max_length=255, blank=True, null=True)
-    author = models.CharField(max_length=63, blank=True, null=True)
+    author = models.CharField(max_length=31, blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
     campain = models.ForeignKey(to='Campain', on_delete=models.CASCADE, related_name='items')
@@ -101,14 +101,17 @@ class AbstractCampain(models.Model):
         editable=False,
     )
     title = models.CharField(
-        max_length=63,
+        max_length=31,
         blank=True, null=True,
         validators=[
             MinLengthValidator(5),
-            MaxLengthValidator(63),
+            MaxLengthValidator(31),
         ]
     )
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(
+        blank=True, null=True,
+        validators=[MaxLengthValidator(31)]
+        )
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
 
@@ -130,11 +133,6 @@ class Campain(AbstractCampain):
         related_name='campain_gm',
         on_delete=models.CASCADE,
         blank=True, null=True,
-        )
-    pcs = models.ManyToManyField(
-        to="PlayerCharacter",
-        related_name='pc_campains',
-        blank=True,
         )
     is_ended = models.BooleanField(default=False)
     game = models.ForeignKey(
@@ -189,10 +187,10 @@ class PlayerCharacter(models.Model):
         editable=False,
     )
     user = models.ForeignKey(to=get_user_model(), on_delete=models.CASCADE, related_name='characters')
-    character_name = models.CharField(max_length=63, null=True, blank=True)
+    character_name = models.CharField(max_length=31, null=True, blank=True)
     campains = models.ManyToManyField(
         to=Campain,
-        related_name='campain_characters',
+        related_name='campain_pcs',
         blank=True,
         )
     description = models.TextField(max_length=255, blank=True, null=True)

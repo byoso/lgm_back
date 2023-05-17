@@ -133,7 +133,6 @@ class CampainViewSet(viewsets.ViewSet):
     """Handle actions on campains"""
 
     def create(self, request):
-        print("=== datas: ", request.data, " ===\n")
         pcs = request.data['pcs']
         campain = Campain.objects.create(
             title=request.data['title'],
@@ -146,17 +145,14 @@ class CampainViewSet(viewsets.ViewSet):
                 raise ValidationError(f"User {pc['id']} does not exists")
             user = User.objects.get(id=pc['id'])
             if pc['name'] == "":
-                print("pc: ", user.username)
                 pc_name = user.username
             else:
-                print("pc: ", pc['name'])
                 pc_name = pc['name']
 
             new_pc = PlayerCharacter.objects.create(
                 character_name=pc_name, user=user, )
             new_pc.campains.add(campain)
             new_pc.save()
-            print("=== new_pc.user.id : ", new_pc.user.id)
             if str(new_pc.user.id) == request.data['master_id']:
                 campain.game_master = new_pc
                 campain.save()

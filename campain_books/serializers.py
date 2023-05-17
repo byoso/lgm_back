@@ -34,6 +34,9 @@ class GameSerializer(ModelSerializer):
 
 
 class PlayerCharacterSerializer(ModelSerializer):
+    user = UserInfosSerializer(read_only=True)
+    character_name = serializers.CharField(required=True, max_length=31)
+
     class Meta:
         model = PlayerCharacter
         fields = '__all__'
@@ -41,18 +44,19 @@ class PlayerCharacterSerializer(ModelSerializer):
 
 
 class CampainSerializer(ModelSerializer):
-    pcs = PlayerCharacterSerializer(read_only=True, many=True)
+    campain_pcs = PlayerCharacterSerializer(read_only=True, many=True)
     table = TableSerializer(read_only=True)
     game = GameSerializer(read_only=False)
     game_master = PlayerCharacterSerializer(read_only=False)
+    title = serializers.CharField(required=True, max_length=31)
+    description = serializers.CharField(required=False, max_length=31)
 
     class Meta:
         model = Campain
         fields = (
-            # '__all__',
             'id',
             'title',
-            'pcs',
+            'campain_pcs',
             'table',
             'game',
             'game_master',
@@ -60,4 +64,3 @@ class CampainSerializer(ModelSerializer):
             'is_ended',
             )
         read_only_fields = ['id', 'date_created', 'date_updated']
-        depth = 1
