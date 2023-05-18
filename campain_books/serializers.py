@@ -10,7 +10,6 @@ User = get_user_model()
 
 
 class TableSerializer(ModelSerializer):
-    # TODO: (or not) maybe change the serializer for a more specific one
     owners = UserInfosSerializer(read_only=True, many=True)
     guests = UserInfosSerializer(read_only=True, many=True)
 

@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ValidationError
+from rest_framework import serializers
 from rest_framework import viewsets
 
 from .models import Table, Game, Campain, PlayerCharacter
@@ -133,29 +134,48 @@ class CampainViewSet(viewsets.ViewSet):
     """Handle actions on campains"""
 
     def create(self, request):
+        message = (
+            "Invalid form, be sure the title, the "
+            "description, and the charater names do not exceed "
+            "31 characters each."
+        )
         pcs = request.data['pcs']
-        campain = Campain.objects.create(
+        campain = Campain(
             title=request.data['title'],
             game=Game.objects.get(id=request.data['game_id']),
             table=Table.objects.get(id=request.data['table_id']),
             description=request.data['description'],
             )
+        try:
+            campain.full_clean()
+        except Exception:
+            return Response({"errors": [message]}, status=400)
+        campain.save()
         for pc in pcs.values():
             if not User.objects.filter(id=pc['id']).exists():
                 raise ValidationError(f"User {pc['id']} does not exists")
             user = User.objects.get(id=pc['id'])
             if pc['name'] == "":
-                pc_name = user.username
+                pc_name = "< anonymous PC >"
             else:
                 pc_name = pc['name']
 
-            new_pc = PlayerCharacter.objects.create(
+            new_pc = PlayerCharacter(
                 character_name=pc_name, user=user, )
-            new_pc.campains.add(campain)
+            try:
+                new_pc.full_clean()
+            except Exception:
+                return Response({"errors": [message]}, status=400)
             new_pc.save()
+            new_pc.campains.add(campain)
             if str(new_pc.user.id) == request.data['master_id']:
                 campain.game_master = new_pc
                 campain.save()
+        if not campain.game_master:
+            return Response(
+                {"errors": ["You must choose a game master"]},
+                status=400
+                )
         return Response({"message": "ok"})
 
 
