@@ -104,7 +104,7 @@ class AbstractCampain(models.Model):
         max_length=31,
         blank=True, null=True,
         validators=[
-            MinLengthValidator(5),
+            MinLengthValidator(1),
             MaxLengthValidator(31),
         ]
     )
