@@ -178,6 +178,11 @@ class CampainViewSet(viewsets.ViewSet):
                 )
         return Response({"message": "ok"})
 
+    def destroy(self, request, pk=None):
+        campain = Campain.objects.get(id=pk)
+        campain.delete()
+        return Response({"message": "ok"})
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated, IsOwner])

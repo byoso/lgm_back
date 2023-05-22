@@ -141,12 +141,12 @@ class Campain(AbstractCampain):
         blank=True, null=True)
 
     table = models.ForeignKey(
-        Table, on_delete=models.PROTECT,
+        Table, on_delete=models.CASCADE,
         related_name='table_campains',
         )
 
     def __str__(self):
-        return f"<Campain: {self.name}>"
+        return f"<Campain: {self.title}>"
 
 
 class CampainTemplate(AbstractCampain):
