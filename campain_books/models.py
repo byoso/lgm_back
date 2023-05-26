@@ -17,6 +17,7 @@ class Game(models.Model):
     name = models.CharField(max_length=31)
     description = models.TextField(max_length=255, blank=True, null=True)
     image_url = models.CharField(max_length=255, blank=True, null=True)
+    official_site = models.CharField(max_length=255, blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
 
@@ -67,8 +68,8 @@ class Item(models.Model):
         ('place', _('Place')),
         ('orga', _('Organisation')),
         ('event', _('Event')),
-        ('notif', _('Notification')),
         ('note', _('Note')),
+        ('recap', _('Recap')),
     )
 
     id = models.UUIDField(
@@ -186,14 +187,19 @@ class PlayerCharacter(models.Model):
         default=uuid.uuid4,
         editable=False,
     )
-    user = models.ForeignKey(to=get_user_model(), on_delete=models.CASCADE, related_name='characters')
+    user = models.ForeignKey(
+        to=get_user_model(),
+        on_delete=models.CASCADE,
+        related_name='campain_users'
+        )
     character_name = models.CharField(max_length=31, null=True, blank=True)
-    campains = models.ManyToManyField(
+    campain = models.ForeignKey(
         to=Campain,
         related_name='campain_pcs',
-        blank=True,
+        on_delete=models.CASCADE,
+        blank=True, null=True,
         )
     description = models.TextField(max_length=255, blank=True, null=True)
 
     def __str__(self):
-        return f"<PlayerCharacter: {self.name}>"
+        return f"<PlayerCharacter: {self.character_name}>"

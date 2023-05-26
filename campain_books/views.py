@@ -4,6 +4,7 @@ from django.db.models import Q
 from django.contrib.auth import get_user_model
 from django.template.loader import get_template
 from django.conf import settings
+from django.db import transaction
 
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -133,6 +134,7 @@ def get_games_list(request):
 class CampainViewSet(viewsets.ViewSet):
     """Handle actions on campains"""
 
+    @transaction.atomic
     def create(self, request):
         message = (
             "Invalid form, be sure the title, the "
@@ -166,8 +168,8 @@ class CampainViewSet(viewsets.ViewSet):
                 new_pc.full_clean()
             except Exception:
                 return Response({"errors": [message]}, status=400)
+            new_pc.campain = campain
             new_pc.save()
-            new_pc.campains.add(campain)
             if str(new_pc.user.id) == request.data['master_id']:
                 campain.game_master = new_pc
                 campain.save()
@@ -182,6 +184,11 @@ class CampainViewSet(viewsets.ViewSet):
         campain = Campain.objects.get(id=pk)
         campain.delete()
         return Response({"message": "ok"})
+
+    def retrieve(self, request, pk=None):
+        campain = Campain.objects.get(id=pk)
+        serializer = CampainSerializer(campain)
+        return Response(serializer.data)
 
 
 @api_view(['GET'])

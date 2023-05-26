@@ -1,5 +1,3 @@
-import uuid
-
 from django.contrib.auth import get_user_model
 from django.template.loader import get_template
 from django.conf import settings
@@ -7,8 +5,37 @@ from django.conf import settings
 from django_silly_auth.utils import dsa_send_mail
 from django_silly_auth.config import SILLY_AUTH_SETTINGS as conf
 
+from .models import PlayerCharacter
+
 
 User = get_user_model()
+
+
+def add_table_guest(table, guest):
+    """Add a new guest to all the campains of a table"""
+    for campain in table.table_campains.all():
+        if not campain.campain_pcs.filter(user=guest).exists():
+            print(f"add {guest.username} to {campain.title}")
+            pc = PlayerCharacter.objects.create(
+                user=guest,
+                character_name="< anonymous PC >"
+                )
+            campain.campain_pcs.add(pc)
+            campain.save()
+
+
+def remove_table_guest(table, guest):
+    """Remove a guest from all the campains of a table"""
+    print(f"remove {guest.username} from {table.name}")
+
+    for campain in table.table_campains.all():
+        print(f"remove {guest.username} from {campain.title}")
+        if campain.campain_pcs.filter(user=guest).exists():
+            pc = PlayerCharacter.objects.get(user=guest, campain=campain)
+            campain.campain_pcs.remove(pc)
+            campain.save()
+            pc.delete()
+    table.guests.remove(guest)
 
 
 def guests_create_or_not(
@@ -18,9 +45,9 @@ def guests_create_or_not(
         serializer=None,
         *args, **kwargs
         ):
+    """Used on creation and update of a table to create the needed guests"""
 
-    table.guests.clear()
-
+    # add needed guests
     for guest_email in guests_list:
         if not User.objects.filter(email=guest_email).exists():
             if "@" not in guest_email or len(guest_email) < 5:
@@ -29,7 +56,7 @@ def guests_create_or_not(
             try:
                 guest = User.objects.create_user(
                     email=guest_email,
-                    username="guest-" + str(uuid.uuid4()),
+                    username=f"<{guest_email.replace('@', '-')}>",
                     password=table.table_password,
                     )
                 jwt_token = guest.get_jwt_token()
@@ -60,5 +87,12 @@ def guests_create_or_not(
         else:
             guest = User.objects.get(email=guest_email)
         table.guests.add(guest)
+        add_table_guest(table, guest)
+
+    # remove unneeded guests
+    for guest in table.guests.all():
+
+        if guest.email not in guests_list:
+            remove_table_guest(table, guest)
     # print("message: ", message)
     return serializer.data
