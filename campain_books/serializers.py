@@ -19,7 +19,6 @@ class TableSerializer(ModelSerializer):
             'id',
             'name',
             'description',
-            'table_password',
             'owners',
             'guests',
         ]

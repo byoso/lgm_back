@@ -1,3 +1,5 @@
+import uuid
+
 from django.contrib.auth import get_user_model
 from django.template.loader import get_template
 from django.conf import settings
@@ -54,15 +56,17 @@ def guests_create_or_not(
                 message += f"Impossible to create this guest: {guest_email}.\n"
                 continue
             try:
+                password = str(uuid.uuid4())
                 guest = User.objects.create_user(
                     email=guest_email,
                     username=f"<{guest_email.replace('@', '-')}>",
-                    password=table.table_password,
+                    password=password,
                     )
                 jwt_token = guest.get_jwt_token()
                 context = {
                     'user': guest,
                     'link': conf['SPA_EMAIL_LOGIN_LINK'] + jwt_token,
+                    'password': password,
                     'site_name': conf["SITE_NAME"],
                     'table_host_name': request.user.username,
                     'table_name': table.name,

@@ -13,6 +13,8 @@ join his table '{{ table_name }}'.
 To confirm your email, please click on the following link:
 {{ link }}
 
+Then change the password of your account.
+
 If you don't expect this invitation from {{ table_host_name }},
 please just ignore this message.
 
