@@ -13,7 +13,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework import serializers
 from rest_framework import viewsets
 
-from .models import Table, Game, Campain, PlayerCharacter
+from .models import Table, Game, Campain, PlayerCharacter, Item
 from .serializers import TableSerializer, GameSerializer, PlayerCharacterSerializer, CampainSerializer
 from .permissions import IsOwner, IsGuestOrOwner
 from .helpers import guests_create_or_not
@@ -198,3 +198,19 @@ def get_campains_for_table(request):
     campains = table.table_campains.all()
     serializer = CampainSerializer(campains, many=True)
     return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_item(request):
+    item = Item(
+        author=request.user,
+        name=request.data['title'],
+        campain=Campain.objects.get(id=request.data['campainId']),
+        image_url=request.data['image_url'],
+        type=request.data['type'],
+        data_pc=request.data['pcsInfos'],
+        data_gm=request.data['gmInfos'],
+        )
+    item.save()
+    return Response({"message": "ok"})

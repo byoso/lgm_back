@@ -64,12 +64,12 @@ class Table(models.Model):
 
 class Item(models.Model):
     TYPE_CHOICES = (
-        ('npc', _('Non-Player Character')),
-        ('place', _('Place')),
-        ('orga', _('Organisation')),
-        ('event', _('Event')),
-        ('note', _('Note')),
-        ('recap', _('Recap')),
+        ('NPC', _('Non-Player Character')),
+        ('PLACE', _('Place')),
+        ('ORGANISATION', _('Organisation')),
+        ('EVENT', _('Event')),
+        ('NOTE', _('Note')),
+        ('RECAP', _('Recap')),
     )
 
     id = models.UUIDField(
@@ -78,8 +78,8 @@ class Item(models.Model):
         editable=False,
     )
     name = models.CharField(max_length=31, blank=True, null=True)
-    image_url = models.CharField(max_length=255, blank=True, null=True)
     author = models.CharField(max_length=31, blank=True, null=True)
+    image_url = models.CharField(max_length=255, blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
     campain = models.ForeignKey(to='Campain', on_delete=models.CASCADE, related_name='items')

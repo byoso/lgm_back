@@ -2,7 +2,7 @@ from django.db.models import Q
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Table, Game, Campain, PlayerCharacter
+from .models import Table, Game, Campain, PlayerCharacter, Item
 
 from django_silly_auth.serializers import UserInfosSerializer
 
@@ -41,7 +41,22 @@ class PlayerCharacterSerializer(ModelSerializer):
         read_only_fields = ['id', 'date_created', 'date_updated']
 
 
+class GetPCItemSerializer(ModelSerializer):
+    class Meta:
+        model = Item
+        fields = '__all__'
+        read_only_fields = ['id', 'date_created', 'date_updated']
+
+
+class GetGMItemSerializer(ModelSerializer):
+    class Meta:
+        model = Item
+        fields = '__all__'
+        read_only_fields = ['id', 'date_created', 'date_updated']
+
+
 class CampainSerializer(ModelSerializer):
+    items = GetGMItemSerializer(read_only=True, many=True)
     campain_pcs = PlayerCharacterSerializer(read_only=True, many=True)
     table = TableSerializer(read_only=True)
     game = GameSerializer(read_only=False)
@@ -60,5 +75,6 @@ class CampainSerializer(ModelSerializer):
             'game_master',
             'description',
             'is_ended',
+            'items',
             )
         read_only_fields = ['id', 'date_created', 'date_updated']
