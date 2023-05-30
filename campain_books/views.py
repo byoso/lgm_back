@@ -1,4 +1,4 @@
-import uuid
+from datetime import datetime
 
 from django.db.models import Q
 from django.contrib.auth import get_user_model
@@ -14,7 +14,11 @@ from rest_framework import serializers
 from rest_framework import viewsets
 
 from .models import Table, Game, Campain, PlayerCharacter, Item
-from .serializers import TableSerializer, GameSerializer, PlayerCharacterSerializer, CampainSerializer
+from .serializers import (
+    TableSerializer, GameSerializer,
+    PlayerCharacterSerializer, CampainSerializer,
+    GetGMItemSerializer, GetPCItemSerializer,
+    )
 from .permissions import IsOwner, IsGuestOrOwner
 from .helpers import guests_create_or_not
 
@@ -203,6 +207,12 @@ def get_campains_for_table(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_item(request):
+    if request.data['title'] == "":
+        return Response({"message": "You must choose a title"}, status=400)
+    if request.data['campainId'] == "":
+        return Response({"message": "You must choose a campain"}, status=400)
+    if request.data['type'] == "":
+        return Response({"message": "You must choose a type"}, status=400)
     item = Item(
         author=request.user,
         name=request.data['title'],
@@ -214,3 +224,41 @@ def create_item(request):
         )
     item.save()
     return Response({"message": "ok"})
+
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_item(request):
+    """
+    Expects an id and the fields to update.
+    Updates the item, returns this item's datas.
+    """
+    # print(request.data)
+    try:
+        item = Item.objects.get(id=request.data['id'])
+        campain = Campain.objects.get(id=item.campain.id)
+    except Item.DoesNotExist or campain.DoesNotExist:
+        return Response({"message": "Ressource does not exist"}, status=400)
+    # only the game master can update a not 'NOTE' item
+    if item.type != 'NOTE':
+        user = request.user
+        game_master = campain.game_master.user
+        if user != game_master:
+            return Response({"message": "You are not the game master"}, status=403)
+    if 'name' in request.data:
+        item.name = request.data['name']
+    if 'image_url' in request.data:
+        item.image_url = request.data['image_url']
+    if 'type' in request.data:
+        item.type = request.data['type']
+    if 'data_pc' in request.data:
+        item.data_pc = request.data['data_pc']
+    if 'data_gm' in request.data:
+        item.data_gm = request.data['data_gm']
+    if 'locked' in request.data:
+        item.locked = request.data['locked']
+        item.date_unlocked = datetime.now()
+    item.save()
+
+    serializer = GetGMItemSerializer(item)
+    return Response(serializer.data)

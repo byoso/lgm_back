@@ -65,7 +65,7 @@ class Table(models.Model):
 class Item(models.Model):
     TYPE_CHOICES = (
         ('NPC', _('Non-Player Character')),
-        ('PLACE', _('Place')),
+        ('LOCATION', _('Location')),
         ('ORGANISATION', _('Organisation')),
         ('EVENT', _('Event')),
         ('NOTE', _('Note')),
@@ -85,8 +85,9 @@ class Item(models.Model):
     campain = models.ForeignKey(to='Campain', on_delete=models.CASCADE, related_name='items')
     type = models.CharField(max_length=31, choices=TYPE_CHOICES)
     locked = models.BooleanField(default=True)
+    date_unlocked = models.DateTimeField(blank=True, null=True)
     data_pc = models.TextField(blank=True, null=True)
-    data_gm = models.TextField(blank=True, null=True) # always locked for PCs
+    data_gm = models.TextField(blank=True, null=True)  # always locked for PCs
 
     class Meta:
         ordering = ('-date_created',)

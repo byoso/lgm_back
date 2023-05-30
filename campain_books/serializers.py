@@ -40,6 +40,11 @@ class PlayerCharacterSerializer(ModelSerializer):
         fields = '__all__'
         read_only_fields = ['id', 'date_created', 'date_updated']
 
+class CampainIdSerializer(ModelSerializer):
+    class Meta:
+        model = Campain
+        fields = ['id']
+        read_only_fields = ['id']
 
 class GetPCItemSerializer(ModelSerializer):
     class Meta:
@@ -49,10 +54,11 @@ class GetPCItemSerializer(ModelSerializer):
 
 
 class GetGMItemSerializer(ModelSerializer):
+    campain = CampainIdSerializer(read_only=True)
     class Meta:
         model = Item
         fields = '__all__'
-        read_only_fields = ['id', 'date_created', 'date_updated']
+        read_only_fields = ['id', 'date_created', 'date_updated', 'campain']
 
 
 class CampainSerializer(ModelSerializer):
