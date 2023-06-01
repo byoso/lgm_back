@@ -7,10 +7,15 @@ from django.conf import settings
 from django_silly_auth.utils import dsa_send_mail
 from django_silly_auth.config import SILLY_AUTH_SETTINGS as conf
 
-from .models import PlayerCharacter
+from .models import PlayerCharacter, Campain
 
 
 User = get_user_model()
+
+
+def is_game_master(user, campain):
+    """Check if a user is a GM of a campain"""
+    return campain.game_master.user == user
 
 
 def add_table_guest(table, guest):

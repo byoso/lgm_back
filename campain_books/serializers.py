@@ -6,6 +6,7 @@ from .models import Table, Game, Campain, PlayerCharacter, Item
 
 from django_silly_auth.serializers import UserInfosSerializer
 
+
 User = get_user_model()
 
 
@@ -40,21 +41,25 @@ class PlayerCharacterSerializer(ModelSerializer):
         fields = '__all__'
         read_only_fields = ['id', 'date_created', 'date_updated']
 
+
 class CampainIdSerializer(ModelSerializer):
     class Meta:
         model = Campain
         fields = ['id']
         read_only_fields = ['id']
 
-class GetPCItemSerializer(ModelSerializer):
+
+class ItemsPCSerializer(ModelSerializer):
+    campain = CampainIdSerializer(read_only=True)
     class Meta:
         model = Item
-        fields = '__all__'
-        read_only_fields = ['id', 'date_created', 'date_updated']
+        exclude = ['data_gm']
+        read_only_fields = ['id', 'date_created', 'date_updated', 'campain']
 
 
-class GetGMItemSerializer(ModelSerializer):
+class ItemsSerializer(ModelSerializer):
     campain = CampainIdSerializer(read_only=True)
+
     class Meta:
         model = Item
         fields = '__all__'
@@ -62,7 +67,55 @@ class GetGMItemSerializer(ModelSerializer):
 
 
 class CampainSerializer(ModelSerializer):
-    items = GetGMItemSerializer(read_only=True, many=True)
+    campain_pcs = PlayerCharacterSerializer(read_only=True, many=True)
+    table = TableSerializer(read_only=True)
+    game = GameSerializer(read_only=False)
+    game_master = PlayerCharacterSerializer(read_only=False)
+    title = serializers.CharField(required=True, max_length=31)
+    description = serializers.CharField(required=False, max_length=31)
+
+    class Meta:
+        model = Campain
+        fields = (
+            'id',
+            'title',
+            'campain_pcs',
+            'table',
+            'game',
+            'game_master',
+            'description',
+            'is_ended',
+            )
+        read_only_fields = ['id', 'date_created', 'date_updated']
+
+
+class CampainItemsSerializer(ModelSerializer):
+    items = ItemsSerializer(read_only=True, many=True)
+    campain_pcs = PlayerCharacterSerializer(read_only=True, many=True)
+    table = TableSerializer(read_only=True)
+    game = GameSerializer(read_only=False)
+    game_master = PlayerCharacterSerializer(read_only=False)
+    title = serializers.CharField(required=True, max_length=31)
+    description = serializers.CharField(required=False, max_length=31)
+
+    class Meta:
+        model = Campain
+        fields = (
+            'id',
+            'title',
+            'campain_pcs',
+            'table',
+            'game',
+            'game_master',
+            'description',
+            'is_ended',
+            'items',
+            )
+        read_only_fields = ['id', 'date_created', 'date_updated']
+
+
+class CampainItemsPCSerializer(ModelSerializer):
+    items = ItemsPCSerializer(read_only=True, many=True)
     campain_pcs = PlayerCharacterSerializer(read_only=True, many=True)
     table = TableSerializer(read_only=True)
     game = GameSerializer(read_only=False)

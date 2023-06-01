@@ -80,7 +80,6 @@ class Item(models.Model):
         editable=False,
     )
     name = models.CharField(max_length=31, blank=True, null=True)
-    author = models.CharField(max_length=31, blank=True, null=True)
     image_url = models.CharField(max_length=255, blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)

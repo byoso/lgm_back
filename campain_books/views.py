@@ -17,10 +17,11 @@ from .models import Table, Game, Campain, PlayerCharacter, Item
 from .serializers import (
     TableSerializer, GameSerializer,
     PlayerCharacterSerializer, CampainSerializer,
-    GetGMItemSerializer, GetPCItemSerializer,
+    ItemsSerializer, ItemsPCSerializer,
+    CampainItemsSerializer, CampainItemsPCSerializer
     )
 from .permissions import IsOwner, IsGuestOrOwner
-from .helpers import guests_create_or_not
+from .helpers import guests_create_or_not, is_game_master
 
 User = get_user_model()
 
@@ -191,8 +192,13 @@ class CampainViewSet(viewsets.ViewSet):
 
     def retrieve(self, request, pk=None):
         campain = Campain.objects.get(id=pk)
-        serializer = CampainSerializer(campain)
-        return Response(serializer.data)
+        if is_game_master(request.user, campain):
+            serializer = CampainItemsSerializer(campain)
+            return Response(serializer.data)
+        else:
+            campain.items.set(campain.items.filter(locked=False))
+            serializer = CampainItemsSerializer(campain)
+            return Response(serializer.data)
 
 
 @api_view(['GET'])
@@ -215,11 +221,12 @@ def create_item(request):
         return Response({"message": "You must choose a type"}, status=400)
     locked = True
     date_unlocked = None
+
     if request.data['type'] == "MEMO":
         locked = False
         date_unlocked = datetime.now()
+
     item = Item(
-        author=request.user,
         name=request.data['title'],
         campain=Campain.objects.get(id=request.data['campainId']),
         image_url=request.data['image_url'],
@@ -240,18 +247,18 @@ def update_item(request):
     Expects an id and the fields to update.
     Updates the item, returns this item's datas.
     """
-    # print(request.data)
+    print("=== update_item request.data :\n", request.data)
     try:
         item = Item.objects.get(id=request.data['id'])
         campain = Campain.objects.get(id=item.campain.id)
     except Item.DoesNotExist or campain.DoesNotExist:
         return Response({"message": "Ressource does not exist"}, status=400)
-    # only the game master can update a not 'MEMO' item
-    if item.type != 'MEMO':
-        user = request.user
-        game_master = campain.game_master.user
-        if user != game_master:
-            return Response({"message": "You are not the game master"}, status=403)
+    # only the game master can update a not 'MEMO' item, or a locked item.
+    if not is_game_master(request.user, campain) and item.locked:
+        return Response({"message": "Game Master only !"}, status=403)
+    if not is_game_master(request.user, campain) and item.type != 'MEMO':
+        return Response({"message": "Game Master only !"}, status=403)
+
     if 'name' in request.data:
         item.name = request.data['name']
     if 'image_url' in request.data:
@@ -261,7 +268,8 @@ def update_item(request):
     if 'data_pc' in request.data:
         item.data_pc = request.data['data_pc']
     if 'data_gm' in request.data:
-        item.data_gm = request.data['data_gm']
+        if is_game_master(request.user, campain):
+            item.data_gm = request.data['data_gm']
     if 'locked' in request.data:
         item.locked = request.data['locked']
         if item.locked:
@@ -269,8 +277,11 @@ def update_item(request):
         else:
             item.date_unlocked = datetime.now()
     item.save()
+    serializer = ItemsSerializer(item)
 
-    serializer = GetGMItemSerializer(item)
+    if not is_game_master(request.user, campain):
+        serializer = ItemsPCSerializer(item)
+
     return Response(serializer.data)
 
 
@@ -287,10 +298,10 @@ def delete_item(request):
     except Item.DoesNotExist or campain.DoesNotExist:
         return Response({"message": "Ressource does not exist"}, status=400)
     # only the game master can delete a not 'MEMO' item
-    if item.type != 'MEMO':
+    if item.type != 'MEMO' or item.locked:
         user = request.user
         game_master = campain.game_master.user
         if user != game_master:
-            return Response({"message": "You are not the game master"}, status=403)
+            return Response({"message": "Game Master only !"}, status=403)
     item.delete()
     return Response({"message": "ok"})
