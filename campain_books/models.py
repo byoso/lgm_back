@@ -70,6 +70,8 @@ class Item(models.Model):
         ('EVENT', _('Event')),
         ('NOTE', _('Note')),
         ('RECAP', _('Recap')),
+        ('MISC', _('Misc')),
+        ('MEMO', _('Memo')),
     )
 
     id = models.UUIDField(

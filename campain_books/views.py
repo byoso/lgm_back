@@ -213,6 +213,11 @@ def create_item(request):
         return Response({"message": "You must choose a campain"}, status=400)
     if request.data['type'] == "":
         return Response({"message": "You must choose a type"}, status=400)
+    locked = True
+    date_unlocked = None
+    if request.data['type'] == "MEMO":
+        locked = False
+        date_unlocked = datetime.now()
     item = Item(
         author=request.user,
         name=request.data['title'],
@@ -221,6 +226,8 @@ def create_item(request):
         type=request.data['type'],
         data_pc=request.data['pcsInfos'],
         data_gm=request.data['gmInfos'],
+        locked=locked,
+        date_unlocked=date_unlocked,
         )
     item.save()
     return Response({"message": "ok"})
@@ -239,8 +246,8 @@ def update_item(request):
         campain = Campain.objects.get(id=item.campain.id)
     except Item.DoesNotExist or campain.DoesNotExist:
         return Response({"message": "Ressource does not exist"}, status=400)
-    # only the game master can update a not 'NOTE' item
-    if item.type != 'NOTE':
+    # only the game master can update a not 'MEMO' item
+    if item.type != 'MEMO':
         user = request.user
         game_master = campain.game_master.user
         if user != game_master:
@@ -257,8 +264,33 @@ def update_item(request):
         item.data_gm = request.data['data_gm']
     if 'locked' in request.data:
         item.locked = request.data['locked']
-        item.date_unlocked = datetime.now()
+        if item.locked:
+            item.date_unlocked = None
+        else:
+            item.date_unlocked = datetime.now()
     item.save()
 
     serializer = GetGMItemSerializer(item)
     return Response(serializer.data)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_item(request):
+    """
+    Expects an id.
+    Deletes the item, returns a message.
+    """
+    try:
+        item = Item.objects.get(id=request.data['id'])
+        campain = Campain.objects.get(id=item.campain.id)
+    except Item.DoesNotExist or campain.DoesNotExist:
+        return Response({"message": "Ressource does not exist"}, status=400)
+    # only the game master can delete a not 'MEMO' item
+    if item.type != 'MEMO':
+        user = request.user
+        game_master = campain.game_master.user
+        if user != game_master:
+            return Response({"message": "You are not the game master"}, status=403)
+    item.delete()
+    return Response({"message": "ok"})
