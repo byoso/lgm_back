@@ -1,7 +1,12 @@
 from django.contrib import admin
 
-from .models import Table, Game
+from .models import (
+    Table,
+    Campain,
+    CampainTemplate,
+    )
 
 
 admin.site.register(Table)
-admin.site.register(Game)
+admin.site.register(Campain)
+admin.site.register(CampainTemplate)

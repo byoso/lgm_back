@@ -13,9 +13,9 @@ from rest_framework.exceptions import ValidationError
 from rest_framework import serializers
 from rest_framework import viewsets
 
-from .models import Table, Game, Campain, PlayerCharacter, Item
+from .models import Table, Campain, PlayerCharacter, Item
 from .serializers import (
-    TableSerializer, GameSerializer,
+    TableSerializer,
     PlayerCharacterSerializer, CampainSerializer,
     ItemsSerializer, ItemsPCSerializer,
     CampainItemsSerializer, CampainItemsPCSerializer
@@ -129,13 +129,6 @@ def switch_guest_owner(request):
     return Response({"message": message, "table": serializer.data})
 
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def get_games_list(request):
-    serializer = GameSerializer(Game.objects.all(), many=True)
-    return Response(serializer.data)
-
-
 class CampainViewSet(viewsets.ViewSet):
     """Handle actions on campains"""
 
@@ -149,7 +142,9 @@ class CampainViewSet(viewsets.ViewSet):
         pcs = request.data['pcs']
         campain = Campain(
             title=request.data['title'],
-            game=Game.objects.get(id=request.data['game_id']),
+            game=request.data['game'],
+            image_url=request.data['image_url'],
+            language=request.data['language'],
             table=Table.objects.get(id=request.data['table_id']),
             description=request.data['description'],
             )

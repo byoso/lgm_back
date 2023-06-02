@@ -7,30 +7,34 @@ from django.utils.translation import gettext_lazy as _
 
 User = get_user_model()
 
+LANGUAGES = [
 
-class Game(models.Model):
-    id = models.UUIDField(
-        primary_key=True,
-        default=uuid.uuid4,
-        editable=False,
-    )
-    name = models.CharField(max_length=31)
-    description = models.TextField(max_length=255, blank=True, null=True)
-    image_url = models.CharField(max_length=255, blank=True, null=True)
-    official_site = models.CharField(max_length=255, blank=True, null=True)
-    date_created = models.DateTimeField(auto_now_add=True)
-    date_updated = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = _('Game')
-        verbose_name_plural = _('Games')
-        ordering = ['name']
-
-    def __str__(self):
-        return f"<Game: {self.name}>"
-
-    def perform_create(self, serializer):
-        serializer.save(owners=self.request.user)
+    ('ar', _('Arabic')),
+    ('cs', _('Czech')),
+    ('zh', _('Chinese')),
+    ('da', _('Danish')),
+    ('nl', _('Dutch')),
+    ('en', _('English')),
+    ('fi', _('Finnish')),
+    ('fr', _('French')),
+    ('de', _('German')),
+    ('el', _('Greek')),
+    ('hi', _('Hindi')),
+    ('hu', _('Hungarian')),
+    ('it', _('Italian')),
+    ('ja', _('Japanese')),
+    ('ko', _('Korean')),
+    ('no', _('Norwegian')),
+    ('fa', _('Persian')),
+    ('pl', _('Polish')),
+    ('pt', _('Portuguese')),
+    ('ru', _('Russian')),
+    ('es', _('Spanish')),
+    ('sv', _('Swedish')),
+    ('th', _('Thai')),
+    ('tr', _('Turkish')),
+    ('vi', _('Vietnamese')),
+]
 
 
 class Table(models.Model):
@@ -39,7 +43,7 @@ class Table(models.Model):
         default=uuid.uuid4,
         editable=False,
     )
-    name = models.CharField(max_length=31)
+    name = models.CharField(max_length=63)
     owners = models.ManyToManyField(
         to=User,
         related_name='tables_owned',
@@ -51,12 +55,11 @@ class Table(models.Model):
         related_name='tables',
         blank=True,
         )
-    table_password = models.CharField(max_length=31, blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"<Table: {self.name}>"
+        return f"<Table: {self.name} - {self.id}>"
 
     def perform_create(self, serializer):
         serializer.save(owners=self.request.user)
@@ -84,7 +87,7 @@ class Item(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
     campain = models.ForeignKey(to='Campain', on_delete=models.CASCADE, related_name='items')
-    type = models.CharField(max_length=31, choices=TYPE_CHOICES)
+    type = models.CharField(max_length=15, choices=TYPE_CHOICES)
     locked = models.BooleanField(default=True)
     date_unlocked = models.DateTimeField(blank=True, null=True)
     data_pc = models.TextField(blank=True, null=True)
@@ -104,16 +107,19 @@ class AbstractCampain(models.Model):
         editable=False,
     )
     title = models.CharField(
-        max_length=31,
+        max_length=63,
         blank=True, null=True,
         validators=[
             MinLengthValidator(1),
-            MaxLengthValidator(31),
+            MaxLengthValidator(63),
         ]
     )
+    language = models.CharField(choices=LANGUAGES, max_length=2, default='en')
+    image_url = models.CharField(max_length=255, blank=True, null=True)
+    game = models.CharField(max_length=63, blank=True, null=True)
     description = models.TextField(
         blank=True, null=True,
-        validators=[MaxLengthValidator(31)]
+        validators=[MaxLengthValidator(63)]
         )
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
@@ -122,7 +128,7 @@ class AbstractCampain(models.Model):
         abstract = True
 
     def __str__(self):
-        return f"<AbstractCampain: {self.name}>"
+        return f"<AbstractCampain: {self.name} - {self.id}>"
 
 
 class Campain(AbstractCampain):
@@ -138,10 +144,6 @@ class Campain(AbstractCampain):
         blank=True, null=True,
         )
     is_ended = models.BooleanField(default=False)
-    game = models.ForeignKey(
-        Game, on_delete=models.PROTECT,
-        related_name='game_campains',
-        blank=True, null=True)
 
     table = models.ForeignKey(
         Table, on_delete=models.CASCADE,
@@ -149,7 +151,7 @@ class Campain(AbstractCampain):
         )
 
     def __str__(self):
-        return f"<Campain: {self.title}>"
+        return f"<Campain: {self.title} - {self.id}>"
 
 
 class CampainTemplate(AbstractCampain):
@@ -174,13 +176,10 @@ class CampainTemplate(AbstractCampain):
     rating = models.IntegerField(blank=True, null=True, choices=RATINGS)
     played_times = models.IntegerField(default=0)
     master = models.OneToOneField(to='Campain', on_delete=models.PROTECT, related_name='template')
-    game = models.ForeignKey(
-        Game, on_delete=models.PROTECT,
-        related_name='campains',
-        blank=True, null=True)
+    is_official = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"<CampainTemplate: {self.name}>"
+        return f"<CampainTemplate: {self.name} - {self.id}>"
 
 
 class PlayerCharacter(models.Model):
@@ -194,7 +193,7 @@ class PlayerCharacter(models.Model):
         on_delete=models.CASCADE,
         related_name='campain_users'
         )
-    character_name = models.CharField(max_length=31, null=True, blank=True)
+    character_name = models.CharField(max_length=63, null=True, blank=True)
     campain = models.ForeignKey(
         to=Campain,
         related_name='campain_pcs',
@@ -204,4 +203,4 @@ class PlayerCharacter(models.Model):
     description = models.TextField(max_length=255, blank=True, null=True)
 
     def __str__(self):
-        return f"<PlayerCharacter: {self.character_name}>"
+        return f"<PlayerCharacter: {self.character_name} - {self.id}>"
