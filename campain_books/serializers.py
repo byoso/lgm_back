@@ -36,6 +36,7 @@ class PlayerCharacterSerializer(ModelSerializer):
 
 
 class CampainIdSerializer(ModelSerializer):
+    """Serializer for the campain id only"""
     class Meta:
         model = Campain
         fields = ['id']
@@ -78,6 +79,7 @@ class CampainSerializer(ModelSerializer):
             'description',
             'is_ended',
             'image_url',
+            'language',
             )
         read_only_fields = ['id', 'date_created', 'date_updated']
 
@@ -105,6 +107,7 @@ class CampainItemsSerializer(ModelSerializer):
             'is_ended',
             'items',
             'image_url',
+            'language',
             )
         read_only_fields = ['id', 'date_created', 'date_updated']
 
@@ -132,5 +135,6 @@ class CampainItemsPCSerializer(ModelSerializer):
             'is_ended',
             'items',
             'image_url',
+            'language',
             )
         read_only_fields = ['id', 'date_created', 'date_updated']
