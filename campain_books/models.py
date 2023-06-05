@@ -190,8 +190,9 @@ class PlayerCharacter(models.Model):
     )
     user = models.ForeignKey(
         to=get_user_model(),
-        on_delete=models.CASCADE,
-        related_name='campain_users'
+        on_delete=models.SET_NULL,
+        related_name='campain_users',
+        blank=True, null=True,
         )
     character_name = models.CharField(max_length=63, null=True, blank=True)
     campain = models.ForeignKey(
@@ -200,7 +201,12 @@ class PlayerCharacter(models.Model):
         on_delete=models.CASCADE,
         blank=True, null=True,
         )
-    description = models.TextField(max_length=255, blank=True, null=True)
+    data_pc = models.TextField(blank=True, null=True)
+    data_player = models.TextField(blank=True, null=True)
+    data_gm = models.TextField(blank=True, null=True)
+    is_active = models.BooleanField(default=False)
+    locked = models.BooleanField(default=True)
+
 
     def __str__(self):
         return f"<PlayerCharacter: {self.character_name} - {self.id}>"
