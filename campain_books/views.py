@@ -139,7 +139,6 @@ class CampainViewSet(viewsets.ViewSet):
             "description, and the charater names do not exceed "
             "31 characters each."
         )
-        pcs = request.data['pcs']
         campain = Campain(
             title=request.data['title'],
             game=request.data['game'],
@@ -147,37 +146,14 @@ class CampainViewSet(viewsets.ViewSet):
             language=request.data['language'],
             table=Table.objects.get(id=request.data['table_id']),
             description=request.data['description'],
+            game_master=request.user,
             )
         try:
             campain.full_clean()
-        except Exception:
+        except Exception as e:
+            print("=== exception: ", e)
             return Response({"errors": [message]}, status=400)
         campain.save()
-        for pc in pcs.values():
-            if not User.objects.filter(id=pc['id']).exists():
-                raise ValidationError(f"User {pc['id']} does not exists")
-            user = User.objects.get(id=pc['id'])
-            if pc['name'] == "":
-                pc_name = "< anonymous PC >"
-            else:
-                pc_name = pc['name']
-
-            new_pc = PlayerCharacter(
-                character_name=pc_name, user=user, )
-            try:
-                new_pc.full_clean()
-            except Exception:
-                return Response({"errors": [message]}, status=400)
-            new_pc.campain = campain
-            new_pc.save()
-            if str(new_pc.user.id) == request.data['master_id']:
-                campain.game_master = new_pc
-                campain.save()
-        if not campain.game_master:
-            return Response(
-                {"errors": ["You must choose a game master"]},
-                status=400
-                )
         return Response({"message": "ok"})
 
     def destroy(self, request, pk=None):

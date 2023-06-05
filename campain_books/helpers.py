@@ -15,7 +15,7 @@ User = get_user_model()
 
 def is_game_master(user, campain):
     """Check if a user is a GM of a campain"""
-    return campain.game_master.user == user
+    return campain.game_master == user
 
 
 def add_table_guest(table, guest):

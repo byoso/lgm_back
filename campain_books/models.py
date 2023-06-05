@@ -138,7 +138,7 @@ class Campain(AbstractCampain):
         editable=False,
     )
     game_master = models.ForeignKey(
-        to="PlayerCharacter",
+        to=User,
         related_name='campain_gm',
         on_delete=models.CASCADE,
         blank=True, null=True,
