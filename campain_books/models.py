@@ -194,7 +194,8 @@ class PlayerCharacter(models.Model):
         related_name='campain_users',
         blank=True, null=True,
         )
-    character_name = models.CharField(max_length=63, null=True, blank=True)
+    name = models.CharField(max_length=63, null=True, blank=True)
+    image_url = models.CharField(max_length=255, blank=True, null=True)
     campain = models.ForeignKey(
         to=Campain,
         related_name='campain_pcs',

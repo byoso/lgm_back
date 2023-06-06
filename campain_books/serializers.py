@@ -27,7 +27,7 @@ class TableSerializer(ModelSerializer):
 
 class PlayerCharacterSerializer(ModelSerializer):
     user = UserInfosSerializer(read_only=True)
-    character_name = serializers.CharField(required=True, max_length=31)
+    name = serializers.CharField(required=True, max_length=31)
 
     class Meta:
         model = PlayerCharacter
@@ -61,7 +61,7 @@ class ItemsSerializer(ModelSerializer):
 
 
 class CampainSerializer(ModelSerializer):
-    # campain_pcs = PlayerCharacterSerializer(read_only=True, many=True)
+    campain_pcs = PlayerCharacterSerializer(read_only=True, many=True)
     table = TableSerializer(read_only=True)
     game_master = UserInfosSerializer(read_only=True)
     title = serializers.CharField(required=True, max_length=31)
@@ -87,7 +87,7 @@ class CampainSerializer(ModelSerializer):
 class CampainItemsSerializer(ModelSerializer):
     """Campain including items with all datas"""
     items = ItemsSerializer(read_only=True, many=True)
-    # campain_pcs = PlayerCharacterSerializer(read_only=True, many=True)
+    campain_pcs = PlayerCharacterSerializer(read_only=True, many=True)
     table = TableSerializer(read_only=True)
     # game = GameSerializer(read_only=False)
     game_master = UserInfosSerializer(read_only=True)
@@ -115,7 +115,7 @@ class CampainItemsSerializer(ModelSerializer):
 class CampainItemsPCSerializer(ModelSerializer):
     """Campain including items with PCs data only"""
     items = ItemsPCSerializer(read_only=True, many=True)
-    # campain_pcs = PlayerCharacterSerializer(read_only=True, many=True)
+    campain_pcs = PlayerCharacterSerializer(read_only=True, many=True)
     table = TableSerializer(read_only=True)
     # game = GameSerializer(read_only=False)
     game_master = UserInfosSerializer(read_only=True)

@@ -276,3 +276,31 @@ def delete_item(request):
             return Response({"message": "Game Master only !"}, status=403)
     item.delete()
     return Response({"message": "ok"})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_pc(request):
+    """
+    Expects a campain id and a name.
+    Creates a pc, returns this pc's datas.
+    """
+    if request.data['campain_id'] == "":
+        return Response({"message": "You must choose a campain"}, status=400)
+    if request.data['player_id'] != "":
+        if User.objects.filter(id=request.data['player_id']).exists():
+            user = User.objects.get(id=request.data['player_id'])
+        else:
+            user = None
+    pc = PlayerCharacter(
+        name=request.data['name'],
+        campain=Campain.objects.get(id=request.data['campain_id']),
+        image_url=request.data['image_url'],
+        data_pc=request.data['data_pc'],
+        data_player=request.data['data_player'],
+        data_gm=request.data['data_gm'],
+        user=user,
+        )
+    pc.save()
+    serializer = PlayerCharacterSerializer(pc)
+    return Response(serializer.data)
