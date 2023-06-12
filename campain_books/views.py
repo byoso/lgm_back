@@ -339,3 +339,19 @@ def update_pc(request):
     pc.save()
     serializer = PlayerCharacterSerializer(pc)
     return Response(serializer.data)
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_pc(request):
+    try:
+        campain_id = request.data['campain_id']
+        campain = Campain.objects.get(id=campain_id)
+        pc = PlayerCharacter.objects.get(id=request.data['id'])
+    except PlayerCharacter.DoesNotExist or Campain.DoesNotExist:
+        return Response({"message": "Ressource does not exist"}, status=400)
+    if pc.campain.id != campain.id:
+        return Response({"message": "Ressource does not exist"}, status=400)
+    if not is_game_master(request.user, campain):
+        return Response({"message": "Game Master only !"}, status=403)
+    pc.delete()
+    return Response({"message": "ok"})
