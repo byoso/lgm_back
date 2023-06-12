@@ -18,7 +18,7 @@ from .serializers import (
     TableSerializer,
     PlayerCharacterSerializer, CampainSerializer,
     ItemsSerializer, ItemsPCSerializer,
-    CampainItemsSerializer, CampainItemsPCSerializer
+    CampainItemsSerializer,
     )
 from .permissions import IsOwner, IsGuestOrOwner
 from .helpers import guests_create_or_not, is_game_master, is_player
@@ -154,22 +154,17 @@ class CampainViewSet(viewsets.ViewSet):
             print("=== exception: ", e)
             return Response({"errors": [message]}, status=400)
         campain.save()
-        return Response({"message": "ok"})
+        return Response({"message": "Campain created"})
 
     def destroy(self, request, pk=None):
         campain = Campain.objects.get(id=pk)
         campain.delete()
-        return Response({"message": "ok"})
+        return Response({"message": "Campain deleted"})
 
     def retrieve(self, request, pk=None):
         campain = Campain.objects.get(id=pk)
-        if is_game_master(request.user, campain):
-            serializer = CampainItemsSerializer(campain)
-            return Response(serializer.data)
-        else:
-            campain.items.set(campain.items.filter(locked=False))
-            serializer = CampainItemsSerializer(campain)
-            return Response(serializer.data)
+        serializer = CampainItemsSerializer(campain, context={'request': request})
+        return Response(serializer.data)
 
 
 @api_view(['GET'])
@@ -339,6 +334,8 @@ def update_pc(request):
                     pc.user = User.objects.get(id=request.data['player_id'])
                 else:
                     pc.user = None
+            if 'locked' in request.data:
+                pc.locked = request.data['locked']
     pc.save()
     serializer = PlayerCharacterSerializer(pc)
     return Response(serializer.data)

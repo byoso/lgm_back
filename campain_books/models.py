@@ -209,8 +209,7 @@ class PlayerCharacter(models.Model):
     locked = models.BooleanField(default=True)
 
     class Meta:
-        # ordering = ('-name', 'user')
-        ordering = ('-user', '-name')
+        ordering = ('locked', '-user', '-name')
 
 
     def __str__(self):
