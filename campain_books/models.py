@@ -208,6 +208,10 @@ class PlayerCharacter(models.Model):
     is_active = models.BooleanField(default=False)
     locked = models.BooleanField(default=True)
 
+    class Meta:
+        # ordering = ('-name', 'user')
+        ordering = ('-user', '-name')
+
 
     def __str__(self):
         return f"<PlayerCharacter: {self.character_name} - {self.id}>"

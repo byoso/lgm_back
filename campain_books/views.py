@@ -21,7 +21,7 @@ from .serializers import (
     CampainItemsSerializer, CampainItemsPCSerializer
     )
 from .permissions import IsOwner, IsGuestOrOwner
-from .helpers import guests_create_or_not, is_game_master
+from .helpers import guests_create_or_not, is_game_master, is_player
 
 User = get_user_model()
 
@@ -218,7 +218,7 @@ def update_item(request):
     Expects an id and the fields to update.
     Updates the item, returns this item's datas.
     """
-    print("=== update_item request.data :\n", request.data)
+
     try:
         item = Item.objects.get(id=request.data['id'])
         campain = Campain.objects.get(id=item.campain.id)
@@ -301,6 +301,44 @@ def create_pc(request):
         data_gm=request.data['data_gm'],
         user=user,
         )
+    pc.save()
+    serializer = PlayerCharacterSerializer(pc)
+    return Response(serializer.data)
+
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_pc(request):
+    """
+    Expects an id and the fields to update.
+    Updates the pc, returns this pc's datas.
+    """
+    try:
+        pc = PlayerCharacter.objects.get(id=request.data['id'])
+        campain = Campain.objects.get(id=pc.campain.id)
+    except PlayerCharacter.DoesNotExist or campain.DoesNotExist:
+        return Response({"message": "Ressource does not exist"}, status=400)
+    # only the game master can update a pc
+    if not is_game_master(request.user, campain) and not is_player(request.user, pc):
+        return Response({"message": "Game Master or player only !"}, status=403)
+
+    if is_player(request.user, pc) or is_game_master(request.user, campain):
+        if 'name' in request.data:
+            pc.name = request.data['name']
+        if 'image_url' in request.data:
+            pc.image_url = request.data['image_url']
+        if 'data_pc' in request.data:
+            pc.data_pc = request.data['data_pc']
+        if 'data_player' in request.data:
+            pc.data_player = request.data['data_player']
+        if is_game_master(request.user, campain):
+            if 'data_gm' in request.data:
+                pc.data_gm = request.data['data_gm']
+            if 'player_id' in request.data:
+                if User.objects.filter(id=request.data['player_id']).exists():
+                    pc.user = User.objects.get(id=request.data['player_id'])
+                else:
+                    pc.user = None
     pc.save()
     serializer = PlayerCharacterSerializer(pc)
     return Response(serializer.data)

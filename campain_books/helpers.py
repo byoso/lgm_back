@@ -18,6 +18,11 @@ def is_game_master(user, campain):
     return campain.game_master == user
 
 
+def is_player(user, pc):
+    """Check if a user is the player of a PC"""
+    return pc.user == user
+
+
 def add_table_guest(table, guest):
     """Add a new guest to all the campains of a table"""
     for campain in table.table_campains.all():
