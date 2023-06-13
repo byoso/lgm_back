@@ -13,7 +13,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework import serializers
 from rest_framework import viewsets
 
-from .models import Table, Campain, PlayerCharacter, Item
+from .models import Table, Campain, PlayerCharacter, Item, LANGUAGES
 from .serializers import (
     TableSerializer,
     PlayerCharacterSerializer, CampainSerializer,
@@ -165,6 +165,45 @@ class CampainViewSet(viewsets.ViewSet):
         campain = Campain.objects.get(id=pk)
         serializer = CampainItemsSerializer(campain, context={'request': request})
         return Response(serializer.data)
+
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_campain(request):
+    """At least a campain id must be provided in the request data"""
+
+    print("=== request.data: ", request.data)
+    try:
+        id = request.data['campain_id']
+        campain = Campain.objects.get(id=id)
+    except Campain.DoesNotExist:
+        raise ValidationError("This campain does not exists")
+    if not is_game_master(request.user, campain):
+        return Response({"message": "Game master only"}, status=400)
+    if 'title' in request.data:
+        if request.data['title'] == "":
+            return Response({"message": "You must choose a title"}, status=400)
+        else:
+            campain.title = request.data['title']
+    if 'game' in request.data:
+        if request.data['game'] == "":
+            return Response({"message": "You must choose a game"}, status=400)
+        else:
+            campain.game = request.data['game']
+    if 'language' in request.data:
+        if request.data['language'] not in map(lambda x: x[0], LANGUAGES):
+            return Response({"message": "Invalid language"}, status=400)
+        else:
+            campain.language = request.data['language']
+    if 'description' in request.data:
+        campain.description = request.data['description']
+    if 'image_url' in request.data:
+        campain.image_url = request.data['image_url']
+
+    campain.save()
+
+    serializer = CampainSerializer(campain)
+    return Response(serializer.data)
 
 
 @api_view(['GET'])
