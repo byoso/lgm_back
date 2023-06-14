@@ -120,6 +120,7 @@ class Collection(models.Model):
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='collections'
         )
+    game = models.CharField(max_length=63, null=True, blank=True)
     description = models.TextField(blank=True, null=True)
     language = models.CharField(choices=LANGUAGES, max_length=2, default='en')
     date_created = models.DateTimeField(auto_now_add=True)
@@ -128,6 +129,7 @@ class Collection(models.Model):
     rating = models.IntegerField(blank=True, null=True, choices=RATINGS)
     times_played = models.IntegerField(default=0)
     is_official = models.BooleanField(default=False)
+    history = models.TextField(blank=True, null=True)
 
     #  items and pcs are related_name
 

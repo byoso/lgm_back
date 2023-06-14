@@ -3,7 +3,10 @@ from django.urls import path, include
 
 from rest_framework.routers import DefaultRouter
 
-from . import views
+from . import (
+    views,
+    views_collections as vc
+    )
 
 router = DefaultRouter()
 router.register('tables', views.TableViewSet, basename='tables')
@@ -25,4 +28,7 @@ urlpatterns = [
     path('pc/create/', views.create_pc, name='create_pc'),
     path('pc/update/', views.update_pc, name='update_pc'),
     path('pc/delete/', views.delete_pc, name='delete_pc'),
+
+    path('collections_crud/', vc.collections_crud, name='collections_crud'),
+    path('collection/', vc.collection_detail, name='collection'),
 ]

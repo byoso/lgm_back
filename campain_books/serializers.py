@@ -121,30 +121,3 @@ class CampainItemsSerializer(ModelSerializer):
         else:
             pcs = PlayerCharacter.objects.filter(campain=obj, locked=False)
         return PlayerCharacterSerializer(pcs, many=True).data
-
-
-# class CampainItemsPCSerializer(ModelSerializer):
-#     """Campain including items with PCs data only"""
-#     items = ItemsPCSerializer(read_only=True, many=True)
-#     campain_pcs = PlayerCharacterSerializer(read_only=True, many=True)
-#     table = TableSerializer(read_only=True)
-#     game_master = UserInfosSerializer(read_only=True)
-#     title = serializers.CharField(required=True, max_length=31)
-#     description = serializers.CharField(required=False, max_length=31)
-
-#     class Meta:
-#         model = Campain
-#         fields = (
-#             'id',
-#             'title',
-#             'campain_pcs',
-#             'table',
-#             'game',
-#             'game_master',
-#             'description',
-#             'is_ended',
-#             'items',
-#             'image_url',
-#             'language',
-#             )
-#         read_only_fields = ['id', 'date_created', 'date_updated']
