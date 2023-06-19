@@ -122,6 +122,7 @@ class Collection(models.Model):
         )
     game = models.CharField(max_length=63, null=True, blank=True)
     description = models.TextField(blank=True, null=True)
+    image_url = models.CharField(max_length=255, blank=True, null=True)
     language = models.CharField(choices=LANGUAGES, max_length=2, default='en')
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
@@ -129,6 +130,7 @@ class Collection(models.Model):
     rating = models.IntegerField(blank=True, null=True, choices=RATINGS)
     times_played = models.IntegerField(default=0)
     is_official = models.BooleanField(default=False)
+    is_shared = models.BooleanField(default=False)
     history = models.TextField(blank=True, null=True)
 
     #  items and pcs are related_name
