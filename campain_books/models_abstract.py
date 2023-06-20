@@ -71,7 +71,7 @@ class AbstractItem(models.Model):
     image_url = models.CharField(max_length=255, blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
-    type = models.CharField(max_length=15, choices=TYPE_CHOICES)
+    type = models.CharField(max_length=15, choices=TYPE_CHOICES, default='MEMO')
     locked = models.BooleanField(default=True)
     date_unlocked = models.DateTimeField(blank=True, null=True)
     data_pc = models.TextField(blank=True, null=True)

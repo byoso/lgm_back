@@ -218,8 +218,8 @@ def get_campains_for_table(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_item(request):
-    if request.data['title'] == "":
-        return Response({"message": "You must choose a title"}, status=400)
+    # if request.data['title'] == "":
+    #     return Response({"message": "You must choose a title"}, status=400)
     if request.data['campainId'] == "":
         return Response({"message": "You must choose a campain"}, status=400)
     if request.data['type'] == "":
@@ -305,7 +305,7 @@ def delete_item(request):
     # only the game master can delete a not 'MEMO' item
     if item.type != 'MEMO' or item.locked:
         user = request.user
-        game_master = campain.game_master.user
+        game_master = campain.game_master
         if user != game_master:
             return Response({"message": "Game Master only !"}, status=403)
     item.delete()

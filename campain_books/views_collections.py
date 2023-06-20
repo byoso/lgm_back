@@ -27,6 +27,7 @@ def collections_crud(request):
             name="New Collection",
             language="en",
             history=history,
+            image_url="",
         )
         serializer = CollectionsSerializer(collection)
         return Response(serializer.data)
