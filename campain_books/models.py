@@ -46,6 +46,8 @@ class Item(AbstractItem):
     campain = models.ForeignKey(
         to='Campain', on_delete=models.CASCADE, related_name='items'
         )
+    locked = models.BooleanField(default=True)
+    date_unlocked = models.DateTimeField(blank=True, null=True)
 
 
 class PlayerCharacter(AbstractPC):
@@ -97,6 +99,9 @@ class CollectionItem(AbstractItem):
 
     def __str__(self):
         return f"<CollectionItem: {self.name} - {self.id}>"
+
+    class Meta:
+        ordering = ('type', '-date_created')
 
 
 class CollectionPC(AbstractPC):

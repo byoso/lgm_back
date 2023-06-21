@@ -3,7 +3,7 @@ from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
-from .models import Collection
+from .models import Collection, CollectionItem, CollectionPC
 
 
 class CollectionsSerializer(ModelSerializer):
@@ -19,16 +19,16 @@ class CollectionsSerializer(ModelSerializer):
 
 class CollectionItemSerializer(ModelSerializer):
     class Meta:
-        model = Collection
-        fields = '__all__',
+        model = CollectionItem
+        fields = '__all__'
         read_only_fields = [
             'id',
         ]
 
 class CollectionPCSerializer(ModelSerializer):
     class Meta:
-        model = Collection
-        fields = '__all__',
+        model = CollectionPC
+        fields = '__all__'
         read_only_fields = [
             'id',
         ]

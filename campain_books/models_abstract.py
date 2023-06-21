@@ -54,7 +54,7 @@ class AbstractItem(models.Model):
     TYPE_CHOICES = (
         ('NPC', _('Non-Player Character')),
         ('LOCATION', _('Location')),
-        ('ORGANISATION', _('Organisation')),
+        ('ORGANIZATION', _('Organization')),
         ('EVENT', _('Event')),
         ('NOTE', _('Note')),
         ('RECAP', _('Recap')),
@@ -72,8 +72,6 @@ class AbstractItem(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
     type = models.CharField(max_length=15, choices=TYPE_CHOICES, default='MEMO')
-    locked = models.BooleanField(default=True)
-    date_unlocked = models.DateTimeField(blank=True, null=True)
     data_pc = models.TextField(blank=True, null=True)
     data_gm = models.TextField(blank=True, null=True)  # always locked for PCs
 
