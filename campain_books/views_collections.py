@@ -16,7 +16,8 @@ from .permissions import IsOwner, IsGuestOrOwner
 from .helpers import is_game_master, is_player
 from .serializers_collections import (
     CollectionsSerializer,
-    CollectionItemSerializer
+    CollectionItemSerializer,
+    CollectionPCSerializer
     )
 
 
@@ -50,6 +51,8 @@ def collections_crud(request):
         if not Collection.objects.filter(id=id).exists():
             return Response({'message': 'ressource not found'}, status=404)
         collection = Collection.objects.get(id=id)
+        if collection.author != request.user:
+            return Response({'message': 'you are not the owner of this ressource'}, status=403)
         collection.delete()
         return Response({'message': 'ressource deleted'}, status=200)
 
@@ -59,6 +62,9 @@ def collections_crud(request):
         id = request.data['id']
         if not Collection.objects.filter(id=id).exists():
             return Response({'message': 'ressource not found'}, status=404)
+        collection = Collection.objects.get(id=id)
+        if collection.author != request.user:
+            return Response({'message': 'you are not the owner of this ressource'}, status=403)
 
         # Handle the items actions
         if 'items_to_create' in request.data:
@@ -81,6 +87,8 @@ def collections_crud(request):
                 if not CollectionItem.objects.filter(id=item_id).exists():
                     return Response({'message': 'ressource not found'}, status=404)
                 item = CollectionItem.objects.get(id=item_id)
+                if item.collection != collection:
+                    return Response({'message': 'you are not the owner of this ressource'}, status=403)
                 item.delete()
 
         if 'items_to_update' in request.data:
@@ -90,6 +98,8 @@ def collections_crud(request):
                 if not CollectionItem.objects.filter(id=item_id).exists():
                     return Response({'message': 'ressource not found'}, status=404)
                 old_item = CollectionItem.objects.get(id=item_id)
+                if old_item.collection != collection:
+                    return Response({'message': 'you are not the owner of this ressource'}, status=403)
                 item = items_to_update[item_id]
                 print("===item_to_update: ", item)
                 if 'name' in item:
@@ -105,11 +115,56 @@ def collections_crud(request):
                 if 'type' in item:
                     old_item.type = item['type']
                 old_item.save()
-                # serializer = CollectionItemSerializer(data=item_to_update, context={'request': request})
-                # if serializer.is_valid():
-                #     serializer.save()
-                # else:
-                #     return Response(serializer.errors, status=400)
+
+        # handle the pcs
+        if 'pcs_to_create' in request.data:
+            print("===PCs to create: ", request.data['pcs_to_create'])
+            pcs_to_create = request.data['pcs_to_create']
+            for pc_id in pcs_to_create:
+                pc = pcs_to_create[pc_id]
+                pc['collection'] = id
+                print(pc)
+                serializer = CollectionPCSerializer(data=pc, context={'request': request})
+                if serializer.is_valid():
+                    serializer.save()
+                else:
+                    return Response(serializer.errors, status=400)
+
+        if 'pcs_to_delete' in request.data:
+            print("===PCs to delete: ", request.data['pcs_to_delete'])
+            pcs_to_delete = request.data['pcs_to_delete']
+            for pc_id in pcs_to_delete:
+                if not CollectionPC.objects.filter(id=pc_id).exists():
+                    return Response({'message': 'ressource not found'}, status=404)
+                pc = CollectionPC.objects.get(id=pc_id)
+                if pc.collection != collection:
+                    return Response({'message': 'you are not the owner of this ressource'}, status=403)
+                pc.delete()
+
+        if 'pcs_to_update' in request.data:
+            print("===PCs to update: ", request.data['pcs_to_update'])
+            pcs_to_update = request.data['pcs_to_update']
+            for pc_id in pcs_to_update:
+                if not CollectionPC.objects.filter(id=pc_id).exists():
+                    return Response({'message': 'ressource not found'}, status=404)
+                old_pc = CollectionPC.objects.get(id=pc_id)
+                if old_pc.collection != collection:
+                    return Response({'message': 'you are not the owner of this ressource'}, status=403)
+                pc = pcs_to_update[pc_id]
+                print("===pc_to_update: ", pc)
+                if 'name' in pc:
+                    old_pc.name = pc['name']
+                if 'description' in pc:
+                    old_pc.description = pc['description']
+                if 'image_url' in pc:
+                    old_pc.image_url = pc['image_url']
+                if 'data_pc' in pc:
+                    old_pc.data_pc = pc['data_pc']
+                if 'data_player' in pc:
+                    old_pc.data_player = pc['data_player']
+                if 'data_gm' in pc:
+                    old_pc.data_gm = pc['data_gm']
+                old_pc.save()
 
         # Handle the collection
         collection = Collection.objects.get(id=id)
@@ -134,8 +189,12 @@ def collection_detail(request):
     serializer = CollectionItemSerializer(items_queryset, many=True)
     items = serializer.data
 
+    pcs_queryset = CollectionPC.objects.filter(collection=id)
+    serializer = CollectionPCSerializer(pcs_queryset, many=True)
+    pcs = serializer.data
+
     return Response({
         'collection_details': collection_details,
         'items': items,
-
+        'pcs': pcs,
         })
