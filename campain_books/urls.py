@@ -31,4 +31,5 @@ urlpatterns = [
 
     path('collections_crud/', vc.collections_crud, name='collections_crud'),
     path('collection/', vc.collection_detail, name='collection'),
+    path('get_shared_collections/', vc.get_shared_collections, name='get_shared_collections'),
 ]

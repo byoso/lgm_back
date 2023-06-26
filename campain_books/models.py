@@ -80,6 +80,9 @@ class Campain(AbstractCampain):
         blank=True, null=True,
         )
     is_ended = models.BooleanField(default=False)
+    is_collectionable = models.BooleanField(default=True)
+    is_official = models.BooleanField(default=False)
+    official_url = models.CharField(max_length=255, blank=True, null=True)
 
     table = models.ForeignKey(
         Table, on_delete=models.CASCADE,
@@ -135,13 +138,14 @@ class Collection(models.Model):
     rating = models.IntegerField(blank=True, null=True, choices=RATINGS)
     times_played = models.IntegerField(default=0)
     is_official = models.BooleanField(default=False)
+    official_url = models.CharField(max_length=255, blank=True, null=True)
     is_shared = models.BooleanField(default=False)
     history = models.TextField(blank=True, null=True)
 
     #  items and pcs are related_name
 
     class Meta:
-        ordering = ('-date_updated',)
+        ordering = ('-is_official', '-date_updated',)
 
     def __str__(self):
         return f"<Collection: {self.name} - {self.id}>"

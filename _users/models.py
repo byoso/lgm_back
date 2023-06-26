@@ -9,3 +9,6 @@ class User(
     AbstractUser
         ):
     is_subscriber = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.username

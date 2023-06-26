@@ -20,6 +20,41 @@ from .serializers_collections import (
     CollectionPCSerializer
     )
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_shared_collections(request):
+    search_by = request.GET.get('search_by', None)
+    language = request.GET.get('language', 'fr')
+    if search_by == 'name':
+        search_text = request.GET.get('search_text', None)
+        collections = Collection.objects.filter(
+            is_shared=True,
+            name__icontains=search_text,
+        )
+    elif search_by == 'author':
+        search_text = request.GET.get('search_text', None)
+        collections = Collection.objects.filter(
+            is_shared=True,
+            author__username__icontains=search_text,
+        )
+    elif search_by == 'game':
+        search_text = request.GET.get('search_text', None)
+        collections = Collection.objects.filter(
+            is_shared=True,
+            game__icontains=search_text,
+        )
+    else:
+        return Response({'message': 'search_by is required'}, status=400)
+    if search_text == '':
+        collections = Collection.objects.filter(is_shared=True)
+    if request.GET.get('language', None) != 'all':
+        collections = collections.filter(language=language)
+    if request.GET.get('only_officials', None) == 'true':
+        collections = collections.filter(is_official=True)
+
+    serializer = CollectionsSerializer(collections, many=True)
+    return Response(serializer.data)
+
 
 @api_view(['POST', 'GET', 'DELETE', 'PUT'])
 @permission_classes([IsAuthenticated])
