@@ -80,6 +80,7 @@ class Campain(AbstractCampain):
         blank=True, null=True,
         )
     is_ended = models.BooleanField(default=False)
+
     is_collectionable = models.BooleanField(default=True)
     is_official = models.BooleanField(default=False)
     official_url = models.CharField(max_length=255, blank=True, null=True)
@@ -145,7 +146,7 @@ class Collection(models.Model):
     #  items and pcs are related_name
 
     class Meta:
-        ordering = ('-is_official', '-date_updated',)
+        ordering = ('-is_official', 'rating', '-date_updated', 'game')
 
     def __str__(self):
         return f"<Collection: {self.name} - {self.id}>"

@@ -1,5 +1,7 @@
 from datetime import datetime, date
 
+from django.db.models import Q
+
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -19,6 +21,36 @@ from .serializers_collections import (
     CollectionItemSerializer,
     CollectionPCSerializer
     )
+
+
+@api_view(['GET', 'POST', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def favorite_collection(request):
+    if request.method in ['POST', 'DELETE']:
+        if not Collection.objects.filter(id=request.data['collection_id']).exists():
+            raise ValidationError({'message': 'collection_id is required'})
+    user = request.user
+    if request.method == 'GET':
+        collections = Collection.objects.filter(
+            Q(fav_users=user) & Q(is_shared=True)
+            )
+        serializer = CollectionsSerializer(collections, many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        collection = Collection.objects.get(id=request.data['collection_id'])
+        if collection.fav_users.filter(id=user.id).exists():
+            return Response({'message': 'already in favs'})
+        collection.fav_users.add(user)
+        collection.save()
+        return Response({'message': 'added to favs'})
+    elif request.method == 'DELETE':
+        collection = Collection.objects.get(id=request.data['collection_id'])
+        if collection.fav_users.filter(id=user.id).exists():
+            collection.fav_users.remove(user)
+            collection.save()
+            return Response({'message': 'removed from favs'})
+        return Response({'message': 'not in favs'})
+    return Response({'message': 'Something gone wrong'}, 400)
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
