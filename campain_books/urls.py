@@ -33,4 +33,8 @@ urlpatterns = [
     path('collection/', vc.collection_detail, name='collection'),
     path('get_shared_collections/', vc.get_shared_collections, name='get_shared_collections'),
     path('favorite_collection/', vc.favorite_collection, name='favorite_collection'),
+    path(
+        'create_campain_from_collection/',
+        vc.create_campain_from_collection,
+        name='create_campain_from_collection'),
 ]

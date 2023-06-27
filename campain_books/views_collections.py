@@ -9,6 +9,10 @@ from rest_framework.exceptions import ValidationError
 from rest_framework import serializers
 
 from .models import (
+    Table,
+    Campain,
+    Item,
+    PlayerCharacter,
     Collection,
     CollectionItem,
     CollectionPC,
@@ -16,12 +20,71 @@ from .models import (
 
 from .permissions import IsOwner, IsGuestOrOwner
 from .helpers import is_game_master, is_player
+from .serializers import (
+    TableMiniSerializer,
+    )
 from .serializers_collections import (
     CollectionsSerializer,
     CollectionItemSerializer,
     CollectionPCSerializer
     )
 
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_campain_from_collection(request):
+    """Create a campain from a collection
+    requires collection_id, table_id and some datas
+    """
+    user = request.user
+    if not user.is_subscriber:
+        return Response({'message': 'you need to be a subscriber'}, 403)
+    if not Collection.objects.filter(id=request.data['collection_id']).exists():
+        raise ValidationError({'message': 'collection_id is required'})
+    collection = Collection.objects.get(id=request.data['collection_id'])
+    if not collection.is_shared:
+        raise ValidationError({'message': 'collection is not shared'})
+    table_id = request.data['table_id']
+    if not Table.objects.filter(Q(id=table_id) & Q(owners=user)).exists():
+        return Response({'message': 'you cant modify this table'}, 403)
+
+    # create the campain
+    campain = Campain.objects.create(
+        title=collection.name,
+        description=collection.description,
+        table=Table.objects.get(id=table_id),
+        game_master=user,
+        parent_collection=collection,
+        language=collection.language,
+        image_url=collection.image_url,
+        game=collection.game,
+        is_official=collection.is_official,
+        official_url=collection.official_url,
+    )
+    if collection.author != user:
+        campain.is_collectible = False
+    for item in collection.items.all():
+        campain_item = Item.objects.create(
+            campain=campain,
+            name=item.name or '',
+            image_url=item.image_url or '',
+            data_pc=item.data_pc or '',
+            data_gm=item.data_gm or '',
+            type=item.type or 'MEMO',
+        )
+        campain.items.add(campain_item)
+    for pc in collection.pcs.all():
+        campain_pc = PlayerCharacter.objects.create(
+            campain=campain,
+            name=pc.name or '',
+            image_url=pc.image_url or '',
+            data_pc=pc.data_pc or '',
+            data_player=pc.data_player or '',
+            data_gm=pc.data_gm or '',
+        )
+        campain.campain_pcs.add(campain_pc)
+    campain.save()
+    return Response({'message': 'new campain created'})
 
 @api_view(['GET', 'POST', 'DELETE'])
 @permission_classes([IsAuthenticated])
@@ -108,8 +171,13 @@ def collections_crud(request):
     if request.method == 'GET':
         user = request.user
         collections = Collection.objects.filter(author=user)
-        serializer = CollectionsSerializer(collections, many=True)
-        return Response(serializer.data)
+        collections_serializer = CollectionsSerializer(collections, many=True)
+        tables = Table.objects.filter(owners=user)
+        tables_serializer = TableMiniSerializer(tables, many=True)
+        return Response({
+            'collections': collections_serializer.data,
+            'tables': tables_serializer.data
+            })
 
     if request.method == 'DELETE':
         if 'id' not in request.data:

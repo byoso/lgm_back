@@ -81,7 +81,13 @@ class Campain(AbstractCampain):
         )
     is_ended = models.BooleanField(default=False)
 
-    is_collectionable = models.BooleanField(default=True)
+    parent_collection = models.ForeignKey(
+        to="Collection",
+        on_delete=models.SET_NULL,
+        related_name='children_campains',
+        blank=True, null=True,
+        )
+    is_collectible = models.BooleanField(default=True)
     is_official = models.BooleanField(default=False)
     official_url = models.CharField(max_length=255, blank=True, null=True)
 

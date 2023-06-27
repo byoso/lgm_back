@@ -11,6 +11,11 @@ from .helpers import is_game_master, is_player
 User = get_user_model()
 
 
+class TableMiniSerializer(ModelSerializer):
+    class Meta:
+        model = Table
+        fields = ['id', 'name']
+
 class TableSerializer(ModelSerializer):
     owners = UserInfosSerializer(read_only=True, many=True)
     guests = UserInfosSerializer(read_only=True, many=True)
@@ -81,8 +86,13 @@ class CampainSerializer(ModelSerializer):
             'is_ended',
             'image_url',
             'language',
+            'is_official',
+            'official_url',
             )
-        read_only_fields = ['id', 'date_created', 'date_updated']
+        read_only_fields = [
+            'id', 'date_created', 'date_updated',
+            'is_official', 'official_url',
+            ]
 
 
 class CampainItemsSerializer(ModelSerializer):
@@ -108,8 +118,14 @@ class CampainItemsSerializer(ModelSerializer):
             'items',
             'image_url',
             'language',
+            'is_official',
+            'official_url',
             )
-        read_only_fields = ['id', 'date_created', 'date_updated']
+        read_only_fields = [
+            'id', 'date_created', 'date_updated',
+            'is_official',
+            'official_url',
+            ]
 
     def get_campain_pcs(self, obj):
         try:
