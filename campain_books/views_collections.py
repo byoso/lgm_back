@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import date
 
 from django.db.models import Q
 
@@ -7,7 +7,6 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import GenericAPIView
-from rest_framework import serializers
 
 from .pagination import CollectionsPagination
 
@@ -21,8 +20,6 @@ from .models import (
     CollectionPC,
 )
 
-from .permissions import IsOwner, IsGuestOrOwner
-from .helpers import is_game_master, is_player
 from .serializers import (
     TableMiniSerializer,
     )
@@ -79,12 +76,6 @@ class SharedCollections(GenericAPIView):
         return Response(data)
 
 
-
-
-        # serializer = CollectionsSerializer(collections, many=True)
-        # return Response(serializer.data)
-
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_campain_from_collection(request):
@@ -95,10 +86,10 @@ def create_campain_from_collection(request):
     if not user.is_subscriber:
         return Response({'message': 'you need to be a subscriber'}, 403)
     if not Collection.objects.filter(id=request.data['collection_id']).exists():
-        raise ValidationError({'message': 'collection_id is required'})
+        return Response({'message': 'collection_id is required'}, 400)
     collection = Collection.objects.get(id=request.data['collection_id'])
     if not collection.is_shared:
-        raise ValidationError({'message': 'collection is not shared'})
+        return Response({'message': 'This collection is not shared'}, 403)
     table_id = request.data['table_id']
     if not Table.objects.filter(Q(id=table_id) & Q(owners=user)).exists():
         return Response({'message': 'you cant modify this table'}, 403)
@@ -116,8 +107,7 @@ def create_campain_from_collection(request):
         is_official=collection.is_official,
         official_url=collection.official_url,
     )
-    if collection.author != user:
-        campain.is_collectible = False
+    # create the items
     for item in collection.items.all():
         campain_item = Item.objects.create(
             campain=campain,
@@ -128,6 +118,7 @@ def create_campain_from_collection(request):
             type=item.type or 'MEMO',
         )
         campain.items.add(campain_item)
+    # create the pcs
     for pc in collection.pcs.all():
         campain_pc = PlayerCharacter.objects.create(
             campain=campain,
