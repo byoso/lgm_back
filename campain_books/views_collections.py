@@ -6,7 +6,10 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ValidationError
+from rest_framework.generics import GenericAPIView
 from rest_framework import serializers
+
+from .pagination import CollectionsPagination
 
 from .models import (
     Table,
@@ -28,6 +31,58 @@ from .serializers_collections import (
     CollectionItemSerializer,
     CollectionPCSerializer
     )
+
+
+class SharedCollections(GenericAPIView):
+    permission_classes = [IsAuthenticated]
+    pagination_class = CollectionsPagination
+    serializer_class = CollectionsSerializer
+
+    def get(self, request):
+        search_by = request.GET.get('search_by', None)
+        language = request.GET.get('language', 'fr')
+        if search_by == 'name':
+            search_text = request.GET.get('search_text', None)
+            collections = Collection.objects.filter(
+                is_shared=True,
+                name__icontains=search_text,
+            )
+        elif search_by == 'author':
+            search_text = request.GET.get('search_text', None)
+            collections = Collection.objects.filter(
+                is_shared=True,
+                author__username__icontains=search_text,
+            )
+        elif search_by == 'game':
+            search_text = request.GET.get('search_text', None)
+            collections = Collection.objects.filter(
+                is_shared=True,
+                game__icontains=search_text,
+            )
+        else:
+            return Response({'message': 'search_by is required'}, status=400)
+        if search_text == '':
+            collections = Collection.objects.filter(is_shared=True)
+        if request.GET.get('language', None) != 'all':
+            collections = collections.filter(language=language)
+        if request.GET.get('only_officials', None) == 'true':
+            collections = collections.filter(is_official=True)
+
+        page = self.paginate_queryset(collections)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            result = self.get_paginated_response(serializer.data)
+            data = result.data  # pagination data
+        else:
+            serializer = self.get_serializer(collections, many=True)
+            data = serializer.data
+        return Response(data)
+
+
+
+
+        # serializer = CollectionsSerializer(collections, many=True)
+        # return Response(serializer.data)
 
 
 @api_view(['POST'])
@@ -114,42 +169,6 @@ def favorite_collection(request):
             return Response({'message': 'removed from favs'})
         return Response({'message': 'not in favs'})
     return Response({'message': 'Something gone wrong'}, 400)
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def get_shared_collections(request):
-    search_by = request.GET.get('search_by', None)
-    language = request.GET.get('language', 'fr')
-    if search_by == 'name':
-        search_text = request.GET.get('search_text', None)
-        collections = Collection.objects.filter(
-            is_shared=True,
-            name__icontains=search_text,
-        )
-    elif search_by == 'author':
-        search_text = request.GET.get('search_text', None)
-        collections = Collection.objects.filter(
-            is_shared=True,
-            author__username__icontains=search_text,
-        )
-    elif search_by == 'game':
-        search_text = request.GET.get('search_text', None)
-        collections = Collection.objects.filter(
-            is_shared=True,
-            game__icontains=search_text,
-        )
-    else:
-        return Response({'message': 'search_by is required'}, status=400)
-    if search_text == '':
-        collections = Collection.objects.filter(is_shared=True)
-    if request.GET.get('language', None) != 'all':
-        collections = collections.filter(language=language)
-    if request.GET.get('only_officials', None) == 'true':
-        collections = collections.filter(is_official=True)
-
-    serializer = CollectionsSerializer(collections, many=True)
-    return Response(serializer.data)
-
 
 @api_view(['POST', 'GET', 'DELETE', 'PUT'])
 @permission_classes([IsAuthenticated])
