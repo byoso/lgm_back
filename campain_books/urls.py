@@ -5,7 +5,8 @@ from rest_framework.routers import DefaultRouter
 
 from . import (
     views,
-    views_collections as vc
+    views_collections as vc,
+    views_exchange as ve,
     )
 
 router = DefaultRouter()
@@ -37,4 +38,6 @@ urlpatterns = [
         'create_campain_from_collection/',
         vc.create_campain_from_collection,
         name='create_campain_from_collection'),
+
+    path('exchanges_loading/', ve.exchangesLoading.as_view(), name='exchanges_loading'),
 ]
