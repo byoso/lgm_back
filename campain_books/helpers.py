@@ -26,13 +26,13 @@ def is_player(user, pc):
 def add_table_guest(table, guest):
     """Add a new guest to all the campains of a table"""
     for campain in table.table_campains.all():
-        if not campain.campain_pcs.filter(user=guest).exists():
+        if not campain.pcs.filter(user=guest).exists():
             print(f"add {guest.username} to {campain.title}")
             pc = PlayerCharacter.objects.create(
                 user=guest,
                 character_name="< anonymous PC >"
                 )
-            campain.campain_pcs.add(pc)
+            campain.pcs.add(pc)
             campain.save()
 
 
@@ -42,9 +42,9 @@ def remove_table_guest(table, guest):
 
     for campain in table.table_campains.all():
         print(f"remove {guest.username} from {campain.title}")
-        if campain.campain_pcs.filter(user=guest).exists():
+        if campain.pcs.filter(user=guest).exists():
             pc = PlayerCharacter.objects.get(user=guest, campain=campain)
-            campain.campain_pcs.remove(pc)
+            campain.pcs.remove(pc)
             campain.save()
             pc.delete()
     table.guests.remove(guest)

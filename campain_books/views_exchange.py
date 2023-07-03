@@ -14,6 +14,10 @@ from .models import (
     )
 from .serializers_exchange import (
     CampainExchangesMiniSerializer,
+    CollectionExchangesMiniSerializer,
+)
+from .serializers_collections import (
+    CollectionItemSerializer,
 )
 
 
@@ -31,4 +35,34 @@ class exchangesLoading(GenericAPIView):
             campains, many=True, context={'request': request}
             )
 
-        return Response({'campains': campain_serializer.data})
+        collections = Collection.objects.filter(author=user).order_by('game')
+        collection_serializer = CollectionExchangesMiniSerializer(
+            collections, many=True, context={'request': request}
+        )
+
+        return Response({
+            'campains': campain_serializer.data,
+            'collections': collection_serializer.data,
+            })
+
+
+# class CollectionDetails(GenericAPIView):
+#     """Serves the details of a collection"""
+#     permission_classes = [IsAuthenticated]
+#     serializer_class = CollectionItemSerializer
+
+#     def get(self, request):
+#         user = request.user
+#         pk = request.GET.get('pk')
+#         if not Collection.objects.filter(id=pk).exists():
+#             return Response({'error': 'Not found'}, status=404)
+
+#         collection = Collection.objects.get(pk=pk)
+#         if collection.author != user:
+#             return Response({'error': 'Not authorized'}, status=403)
+
+#         collection_serializer = CollectionItemSerializer(
+#             collection, context={'request': request}
+#         )
+
+#         return Response(collection_serializer.data)

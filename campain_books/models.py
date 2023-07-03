@@ -53,7 +53,8 @@ class Item(AbstractItem):
 class PlayerCharacter(AbstractPC):
     campain = models.ForeignKey(
         to="Campain",
-        related_name='campain_pcs',
+        # related_name='campain_pcs',
+        related_name='pcs',
         on_delete=models.CASCADE,
         )
     user = models.ForeignKey(
@@ -131,7 +132,7 @@ class Collection(models.Model):
         default=uuid.uuid4,
         editable=False,
     )
-    name = models.CharField(max_length=63)
+    title = models.CharField(max_length=63)
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='collections'
         )

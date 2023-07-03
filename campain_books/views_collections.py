@@ -38,11 +38,11 @@ class SharedCollections(GenericAPIView):
     def get(self, request):
         search_by = request.GET.get('search_by', None)
         language = request.GET.get('language', 'fr')
-        if search_by == 'name':
+        if search_by == 'title':
             search_text = request.GET.get('search_text', None)
             collections = Collection.objects.filter(
                 is_shared=True,
-                name__icontains=search_text,
+                title__icontains=search_text,
             )
         elif search_by == 'author':
             search_text = request.GET.get('search_text', None)
@@ -96,7 +96,7 @@ def create_campain_from_collection(request):
 
     # create the campain
     campain = Campain.objects.create(
-        title=collection.name,
+        title=collection.title,
         description=collection.description,
         table=Table.objects.get(id=table_id),
         game_master=user,
@@ -128,7 +128,7 @@ def create_campain_from_collection(request):
             data_player=pc.data_player or '',
             data_gm=pc.data_gm or '',
         )
-        campain.campain_pcs.add(campain_pc)
+        campain.pcs.add(campain_pc)
     campain.save()
     return Response({'message': 'new campain created'})
 
@@ -170,7 +170,7 @@ def collections_crud(request):
         history = f"{date_now} - Created by {user.username}"
         collection = Collection.objects.create(
             author=user,
-            name="New Collection",
+            title="New Collection",
             language="en",
             history=history,
             image_url="",
@@ -323,6 +323,9 @@ def collections_crud(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def collection_detail(request):
+    """Get the details of a collection, including its items and pcs
+    - id is required in the request params.
+    """
     id = request.GET['id']
     if not Collection.objects.filter(id=id).exists():
         return Response({'message': 'ressource not found'}, status=404)

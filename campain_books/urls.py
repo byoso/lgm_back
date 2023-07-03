@@ -40,4 +40,5 @@ urlpatterns = [
         name='create_campain_from_collection'),
 
     path('exchanges_loading/', ve.exchangesLoading.as_view(), name='exchanges_loading'),
+    # path('collection_details/', ve.CollectionDetails.as_view(), name='collection_details'),
 ]

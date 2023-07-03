@@ -67,7 +67,7 @@ class ItemsSerializer(ModelSerializer):
 
 
 class CampainSerializer(ModelSerializer):
-    campain_pcs = PlayerCharacterSerializer(read_only=True, many=True)
+    pcs = PlayerCharacterSerializer(read_only=True, many=True)
     table = TableSerializer(read_only=True)
     game_master = UserInfosSerializer(read_only=True)
     title = serializers.CharField(required=True, max_length=31)
@@ -78,7 +78,7 @@ class CampainSerializer(ModelSerializer):
         fields = (
             'id',
             'title',
-            'campain_pcs',
+            'pcs',
             'table',
             'game',
             'game_master',
@@ -98,7 +98,7 @@ class CampainSerializer(ModelSerializer):
 class CampainItemsSerializer(ModelSerializer):
     """Campain including items with all datas"""
     items = ItemsSerializer(read_only=True, many=True)
-    campain_pcs = SerializerMethodField()
+    pcs = SerializerMethodField()
     table = TableSerializer(read_only=True)
     game_master = UserInfosSerializer(read_only=True)
     title = serializers.CharField(required=True, max_length=31)
@@ -109,7 +109,7 @@ class CampainItemsSerializer(ModelSerializer):
         fields = (
             'id',
             'title',
-            'campain_pcs',
+            'pcs',
             'table',
             'game',
             'game_master',
@@ -127,7 +127,7 @@ class CampainItemsSerializer(ModelSerializer):
             'official_url',
             ]
 
-    def get_campain_pcs(self, obj):
+    def get_pcs(self, obj):
         try:
             user = self.context['request'].user
         except KeyError:
