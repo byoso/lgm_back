@@ -88,7 +88,7 @@ def create_campain_from_collection(request):
     if not Collection.objects.filter(id=request.data['collection_id']).exists():
         return Response({'message': 'collection_id is required'}, 400)
     collection = Collection.objects.get(id=request.data['collection_id'])
-    if not collection.is_shared:
+    if not collection.is_shared and collection.author != user:
         return Response({'message': 'This collection is not shared'}, 403)
     table_id = request.data['table_id']
     if not Table.objects.filter(Q(id=table_id) & Q(owners=user)).exists():
@@ -100,7 +100,8 @@ def create_campain_from_collection(request):
         description=collection.description,
         table=Table.objects.get(id=table_id),
         game_master=user,
-        parent_collection=collection,
+        # parent_collection=collection,
+        is_copy_free=collection.is_copy_free,
         language=collection.language,
         image_url=collection.image_url,
         game=collection.game,
@@ -202,7 +203,9 @@ def collections_crud(request):
         return Response({'message': 'ressource deleted'}, status=200)
 
     if request.method == 'PUT':
+        print("=== PUT request in collection crud view ===")
         if 'id' not in request.data:
+            print("=== id is required")
             return Response({'message': 'id is required'}, status=400)
         id = request.data['id']
         if not Collection.objects.filter(id=id).exists():
@@ -223,6 +226,7 @@ def collections_crud(request):
                 if serializer.is_valid():
                     serializer.save()
                 else:
+                    print("=== invalid serializer")
                     return Response(serializer.errors, status=400)
 
         if 'items_to_delete' in request.data:
@@ -311,12 +315,14 @@ def collections_crud(request):
                     old_pc.data_gm = pc['data_gm']
                 old_pc.save()
 
+        print("=== all done before serializer")
         # Handle the collection
         collection = Collection.objects.get(id=id)
         serializer = CollectionsSerializer(collection, data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
+        print("=== invalid serializer")
         return Response(serializer.errors, status=400)
 
 

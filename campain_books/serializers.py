@@ -88,6 +88,7 @@ class CampainSerializer(ModelSerializer):
             'language',
             'is_official',
             'official_url',
+            'is_copy_free',
             )
         read_only_fields = [
             'id', 'date_created', 'date_updated',
@@ -120,6 +121,7 @@ class CampainItemsSerializer(ModelSerializer):
             'language',
             'is_official',
             'official_url',
+            'is_copy_free',
             )
         read_only_fields = [
             'id', 'date_created', 'date_updated',

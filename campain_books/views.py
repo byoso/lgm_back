@@ -199,6 +199,8 @@ def update_campain(request):
         campain.description = request.data['description']
     if 'image_url' in request.data:
         campain.image_url = request.data['image_url']
+    if 'is_copy_free' in request.data and campain.is_copy_free:
+        campain.is_copy_free = request.data['is_copy_free']
 
     campain.save()
 

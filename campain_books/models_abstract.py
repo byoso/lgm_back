@@ -110,17 +110,10 @@ class AbstractCampain(models.Model):
         default=uuid.uuid4,
         editable=False,
     )
-    title = models.CharField(
-        max_length=63,
-        blank=True, null=True,
-        validators=[
-            MinLengthValidator(1),
-            MaxLengthValidator(63),
-        ]
-    )
+    title = models.CharField(max_length=63, default='', blank=True)
     language = models.CharField(choices=LANGUAGES, max_length=2, default='en')
     image_url = models.CharField(max_length=255, blank=True, null=True)
-    game = models.CharField(max_length=63, blank=True, null=True)
+    game = models.CharField(max_length=63, default='', blank=True)
     description = models.TextField(
         blank=True, null=True,
         validators=[MaxLengthValidator(63)]

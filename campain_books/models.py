@@ -88,7 +88,9 @@ class Campain(AbstractCampain):
         related_name='children_campains',
         blank=True, null=True,
         )
-    # is_collectible = models.BooleanField(default=True)
+
+    is_copy_free = models.BooleanField(default=True)
+
     is_official = models.BooleanField(default=False)
     official_url = models.CharField(max_length=255, blank=True, null=True)
 
@@ -132,11 +134,11 @@ class Collection(models.Model):
         default=uuid.uuid4,
         editable=False,
     )
-    title = models.CharField(max_length=63)
+    title = models.CharField(max_length=63, default='', blank=True)
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='collections'
         )
-    game = models.CharField(max_length=63, null=True, blank=True)
+    game = models.CharField(max_length=63, default='', blank=True)
     description = models.TextField(blank=True, null=True)
     image_url = models.CharField(max_length=255, blank=True, null=True)
     language = models.CharField(choices=LANGUAGES, max_length=2, default='en')
