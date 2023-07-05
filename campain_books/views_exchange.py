@@ -51,3 +51,19 @@ class exchangesLoading(GenericAPIView):
             'collections': collection_serializer.data,
             'favorites': favorites_serializer.data,
             })
+
+
+class ApplyExchanges(GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        exports = request.data['exports']
+        user = request.user
+        #  data check
+
+        for export in exports:
+            print(export)
+
+
+
+        return Response({'message': 'ok'})

@@ -65,7 +65,7 @@ class PlayerCharacter(AbstractPC):
         )
 
     class Meta:
-        ordering = ('locked', '-user', '-name')
+        ordering = ('locked', '-user', 'name')
 
 
 class Campain(AbstractCampain):
@@ -114,7 +114,7 @@ class CollectionItem(AbstractItem):
         return f"<CollectionItem: {self.name} - {self.id}>"
 
     class Meta:
-        ordering = ('type', '-date_created')
+        ordering = ('type', 'name')
 
 
 class CollectionPC(AbstractPC):
@@ -123,6 +123,9 @@ class CollectionPC(AbstractPC):
         on_delete=models.CASCADE,
         related_name='pcs',
         )
+
+    class Meta:
+        ordering = ('name',)
 
     def __str__(self):
         return f"<CollectionPC: {self.name} - {self.id}>"

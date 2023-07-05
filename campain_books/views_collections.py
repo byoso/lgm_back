@@ -31,6 +31,7 @@ from .serializers_collections import (
 
 
 class SharedCollections(GenericAPIView):
+    """Responds to the research of a collection by title, author or game"""
     permission_classes = [IsAuthenticated]
     pagination_class = CollectionsPagination
     serializer_class = CollectionsSerializer

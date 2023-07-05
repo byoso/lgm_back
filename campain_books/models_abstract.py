@@ -76,7 +76,7 @@ class AbstractItem(models.Model):
     data_gm = models.TextField(blank=True, null=True)  # always locked for PCs
 
     class Meta:
-        ordering = ('-date_created',)
+        ordering = ('type', 'name',)
         abstract = True
 
     def __str__(self):
@@ -99,6 +99,7 @@ class AbstractPC(models.Model):
 
     class Meta:
         abstract = True
+        ordering = ('name',)
 
     def __str__(self):
         return f"<PlayerCharacter: {self.character_name} - {self.id}>"
