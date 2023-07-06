@@ -102,7 +102,7 @@ class AbstractPC(models.Model):
         ordering = ('name',)
 
     def __str__(self):
-        return f"<PlayerCharacter: {self.character_name} - {self.id}>"
+        return f"<PlayerCharacter: {self.name} - {self.id}>"
 
 
 class AbstractCampain(models.Model):

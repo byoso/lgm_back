@@ -99,6 +99,9 @@ class Campain(AbstractCampain):
         related_name='table_campains',
         )
 
+    class Meta:
+        ordering = ('table', 'title',)
+
     def __str__(self):
         return f"<Campain: {self.title} - {self.id}>"
 

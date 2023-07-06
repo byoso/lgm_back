@@ -10,11 +10,17 @@ from .models import (
     )
 
 class CampainExchangesMiniSerializer(ModelSerializer):
+    table = SerializerMethodField()
 
     class Meta:
         model = Campain
-        fields = ['id', 'title', 'is_copy_free', 'game']
+        fields = ['id', 'title', 'is_copy_free', 'game', 'table']
         read_only_fields = ['id', 'title', 'is_copy_free', 'game']
+
+        ordering = ['table', 'game', 'title']
+
+    def get_table(self, obj):
+        return obj.table.name
 
 
 class CollectionExchangesMiniSerializer(ModelSerializer):

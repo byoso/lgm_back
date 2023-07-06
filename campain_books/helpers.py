@@ -7,7 +7,7 @@ from django.conf import settings
 from django_silly_auth.utils import dsa_send_mail
 from django_silly_auth.config import SILLY_AUTH_SETTINGS as conf
 
-from .models import PlayerCharacter, Campain
+from .models import PlayerCharacter, Campain, Collection
 
 
 User = get_user_model()
@@ -110,3 +110,78 @@ def guests_create_or_not(
             remove_table_guest(table, guest)
     # print("message: ", message)
     return serializer.data
+
+
+def check_sources_validity(
+        user,
+        a_type, b_type,
+        source_a, source_b,
+        a_is_exporting, b_is_exporting
+        ):
+    """Check if the exchanges are allowed"""
+    if a_type == "campain" and source_a.game_master != user:
+        return False
+    if b_type == "campain" and source_b.game_master != user:
+        return False
+
+    if a_type == "collection" and b_type == "collection":
+        if source_a.author == user and source_a.author == user:
+            return True
+        if source_a.author == user and source_b.author != user:
+            if a_is_exporting:
+                return False
+            if b_is_exporting and not source_b.is_copy_free:
+                return False
+        if source_a.author != user and source_b.author == user:
+            if b_is_exporting:
+                return False
+            if a_is_exporting and not source_a.is_copy_free:
+                return False
+        if source_a.author != user and source_b.author != user:
+            return False
+
+    if a_type == "campain" and b_type == "campain":
+        if a_is_exporting and not source_a.is_copy_free:
+            if source_b.is_copy_free:
+                return False
+        if b_is_exporting and not source_b.is_copy_free:
+            if source_a.is_copy_free:
+                return False
+
+    if a_type == "campain" and b_type == "collection":
+        if b_is_exporting and not source_b.is_copy_free:
+            if source_b.author != user and source_a.is_copy_free:
+                return False
+        if a_is_exporting and not source_a.is_copy_free:
+            return False
+
+    if a_type == "collection" and b_type == "campain":
+        if a_is_exporting and not source_a.is_copy_free:
+            if source_a.author != user and source_b.is_copy_free:
+                return False
+        if b_is_exporting and not source_b.is_copy_free:
+            return False
+
+    return True
+
+
+def check_before_exchanges(user, source_a, source_b, exchanges):
+    """Prepares the datas for the real check, returns the result (Bool)"""
+    a_type = exchanges['a_type']
+    b_type = exchanges['b_type']
+    if len(exchanges['from_a']['items']) > 0 or len(exchanges['from_a']['pcs']) > 0:
+        a_is_exporting = True
+    else:
+        a_is_exporting = False
+    if len(exchanges['from_b']['items']) > 0 or len(exchanges['from_b']['pcs']) > 0:
+        b_is_exporting = True
+    else:
+        b_is_exporting = False
+
+    # actual validity checking
+    return check_sources_validity(
+        user,
+        a_type, b_type,
+        source_a, source_b,
+        a_is_exporting, b_is_exporting
+        )
