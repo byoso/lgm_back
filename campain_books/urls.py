@@ -33,7 +33,7 @@ urlpatterns = [
     path('collections_crud/', vc.collections_crud, name='collections_crud'),
     path('collection/', vc.collection_detail, name='collection'),
     path('shared_collections/', vc.SharedCollections.as_view(), name='shared_collections'),
-    path('favorite_collection/', vc.favorite_collection, name='favorite_collection'),
+    path('collection/favorite_collection/', vc.favorite_collection, name='favorite_collection'),
     path(
         'create_campain_from_collection/',
         vc.create_campain_from_collection,

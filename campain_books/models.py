@@ -151,8 +151,6 @@ class Collection(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
 
-    rating = models.IntegerField(blank=True, null=True, choices=RATINGS)
-    times_played = models.IntegerField(default=0)
     is_official = models.BooleanField(default=False)
     official_url = models.CharField(max_length=255, blank=True, null=True)
     is_shared = models.BooleanField(default=False)
@@ -166,4 +164,40 @@ class Collection(models.Model):
         ordering = ('-is_official', 'rating', '-date_updated', 'game')
 
     def __str__(self):
-        return f"<Collection: {self.name} - {self.id}>"
+        return f"<Collection: {self.title} - {self.id}>"
+
+
+class Rating(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
+    voters = models.ManyToManyField(
+        to=User,
+        related_name='ratings',
+    )
+    votes_count = models.IntegerField(default=0)
+    points = models.IntegerField(default=0)
+    collection = models.OneToOneField(
+        to=Collection,
+        on_delete=models.CASCADE,
+        related_name='rating',
+    )
+
+    def __str__(self):
+        return f"<Rating: {self.collection.title} - {self.id}>"
+
+    def add_vote(self, user, points):
+        if user in self.voters.all():
+            return False
+        self.voters.add(user)
+        self.votes_count += 1
+        self.points += points
+        self.save()
+        return True
+
+    def average(self):
+        if self.votes_count == 0:
+            return 0
+        return f"{self.points / self.votes_count:.1f}"

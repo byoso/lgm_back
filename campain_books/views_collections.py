@@ -131,6 +131,7 @@ def create_campain_from_collection(request):
             data_gm=pc.data_gm or '',
         )
         campain.pcs.add(campain_pc)
+    campain.parent_collection = collection
     campain.save()
     return Response({'message': 'new campain created'})
 
