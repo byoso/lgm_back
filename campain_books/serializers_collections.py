@@ -3,7 +3,7 @@ from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
-from .models import Collection, CollectionItem, CollectionPC
+from .models import Collection, CollectionItem, CollectionPC, Rating
 
 
 class CollectionsSerializer(ModelSerializer):
@@ -11,12 +11,15 @@ class CollectionsSerializer(ModelSerializer):
     author = SerializerMethodField()
     rating = SerializerMethodField()
     votes_count = SerializerMethodField()
+    voted = SerializerMethodField()  # if user already voted for it (Bool)
 
     class Meta:
         model = Collection
         fields = '__all__'
         read_only_fields = [
-            'id', 'date_created', 'date_updated', 'history', 'author']
+            'id', 'date_created', 'date_updated', 'history',
+            'author', 'vote'
+            ]
 
     def get_author(self, obj):
         return obj.author.username
@@ -27,6 +30,12 @@ class CollectionsSerializer(ModelSerializer):
     def get_votes_count(self, obj):
         return obj.rating.votes_count
 
+    def get_voted(self, obj):
+        user = self.context['request'].user
+        rating = Rating.objects.get(collection=obj)
+        if rating.voters == user:
+            return True
+        return False
 
 
 class CollectionItemSerializer(ModelSerializer):

@@ -18,6 +18,7 @@ from .models import (
     Collection,
     CollectionItem,
     CollectionPC,
+    Rating,
 )
 
 from .serializers import (
@@ -108,6 +109,7 @@ def create_campain_from_collection(request):
         game=collection.game,
         is_official=collection.is_official,
         official_url=collection.official_url,
+        parent_collection=collection,
     )
     # create the items
     for item in collection.items.all():
@@ -146,7 +148,7 @@ def favorite_collection(request):
         collections = Collection.objects.filter(
             Q(fav_users=user) & Q(is_shared=True)
             )
-        serializer = CollectionsSerializer(collections, many=True)
+        serializer = CollectionsSerializer(collections, many=True, context={'request': request})
         return Response(serializer.data)
     elif request.method == 'POST':
         collection = Collection.objects.get(id=request.data['collection_id'])
@@ -178,13 +180,16 @@ def collections_crud(request):
             history=history,
             image_url="",
         )
-        serializer = CollectionsSerializer(collection)
+        Rating.objects.create(
+            collection=collection
+        )
+        serializer = CollectionsSerializer(collection, context={'request': request})
         return Response(serializer.data)
 
     if request.method == 'GET':
         user = request.user
         collections = Collection.objects.filter(author=user)
-        collections_serializer = CollectionsSerializer(collections, many=True)
+        collections_serializer = CollectionsSerializer(collections, many=True, context={'request': request})
         tables = Table.objects.filter(owners=user)
         tables_serializer = TableMiniSerializer(tables, many=True)
         return Response({
@@ -205,9 +210,7 @@ def collections_crud(request):
         return Response({'message': 'ressource deleted'}, status=200)
 
     if request.method == 'PUT':
-        print("=== PUT request in collection crud view ===")
         if 'id' not in request.data:
-            print("=== id is required")
             return Response({'message': 'id is required'}, status=400)
         id = request.data['id']
         if not Collection.objects.filter(id=id).exists():
@@ -218,21 +221,17 @@ def collections_crud(request):
 
         # Handle the items actions
         if 'items_to_create' in request.data:
-            print("===Items to create: ", request.data['items_to_create'])
             items_to_create = request.data['items_to_create']
             for item_id in items_to_create:
                 item = items_to_create[item_id]
                 item['collection'] = id
-                print(item)
                 serializer = CollectionItemSerializer(data=item, context={'request': request})
                 if serializer.is_valid():
                     serializer.save()
                 else:
-                    print("=== invalid serializer")
                     return Response(serializer.errors, status=400)
 
         if 'items_to_delete' in request.data:
-            print("===Items to delete: ", request.data['items_to_delete'])
             items_to_delete = request.data['items_to_delete']
             for item_id in items_to_delete:
                 if not CollectionItem.objects.filter(id=item_id).exists():
@@ -243,7 +242,6 @@ def collections_crud(request):
                 item.delete()
 
         if 'items_to_update' in request.data:
-            print("===Items to update: ", request.data['items_to_update'])
             items_to_update = request.data['items_to_update']
             for item_id in items_to_update:
                 if not CollectionItem.objects.filter(id=item_id).exists():
@@ -252,7 +250,6 @@ def collections_crud(request):
                 if old_item.collection != collection:
                     return Response({'message': 'you are not the owner of this ressource'}, status=403)
                 item = items_to_update[item_id]
-                print("===item_to_update: ", item)
                 if 'name' in item:
                     old_item.name = item['name']
                 if 'description' in item:
@@ -269,12 +266,10 @@ def collections_crud(request):
 
         # handle the pcs
         if 'pcs_to_create' in request.data:
-            print("===PCs to create: ", request.data['pcs_to_create'])
             pcs_to_create = request.data['pcs_to_create']
             for pc_id in pcs_to_create:
                 pc = pcs_to_create[pc_id]
                 pc['collection'] = id
-                print(pc)
                 serializer = CollectionPCSerializer(data=pc, context={'request': request})
                 if serializer.is_valid():
                     serializer.save()
@@ -282,7 +277,6 @@ def collections_crud(request):
                     return Response(serializer.errors, status=400)
 
         if 'pcs_to_delete' in request.data:
-            print("===PCs to delete: ", request.data['pcs_to_delete'])
             pcs_to_delete = request.data['pcs_to_delete']
             for pc_id in pcs_to_delete:
                 if not CollectionPC.objects.filter(id=pc_id).exists():
@@ -293,7 +287,6 @@ def collections_crud(request):
                 pc.delete()
 
         if 'pcs_to_update' in request.data:
-            print("===PCs to update: ", request.data['pcs_to_update'])
             pcs_to_update = request.data['pcs_to_update']
             for pc_id in pcs_to_update:
                 if not CollectionPC.objects.filter(id=pc_id).exists():
@@ -302,7 +295,6 @@ def collections_crud(request):
                 if old_pc.collection != collection:
                     return Response({'message': 'you are not the owner of this ressource'}, status=403)
                 pc = pcs_to_update[pc_id]
-                print("===pc_to_update: ", pc)
                 if 'name' in pc:
                     old_pc.name = pc['name']
                 if 'description' in pc:
@@ -317,14 +309,12 @@ def collections_crud(request):
                     old_pc.data_gm = pc['data_gm']
                 old_pc.save()
 
-        print("=== all done before serializer")
         # Handle the collection
         collection = Collection.objects.get(id=id)
         serializer = CollectionsSerializer(collection, data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
-        print("=== invalid serializer")
         return Response(serializer.errors, status=400)
 
 
@@ -338,7 +328,7 @@ def collection_detail(request):
     if not Collection.objects.filter(id=id).exists():
         return Response({'message': 'ressource not found'}, status=404)
     collection = Collection.objects.get(id=id)
-    serializer = CollectionsSerializer(collection)
+    serializer = CollectionsSerializer(collection, context={'request': request})
     collection_details = serializer.data
 
     items_queryset = CollectionItem.objects.filter(collection=id)

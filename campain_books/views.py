@@ -13,13 +13,23 @@ from rest_framework.exceptions import ValidationError
 from rest_framework import serializers
 from rest_framework import viewsets
 
-from .models import Table, Campain, PlayerCharacter, Item, LANGUAGES
+from .models import (
+    Table,
+    Campain,
+    PlayerCharacter,
+    Item,
+    LANGUAGES,
+    Collection,
+    )
 from .serializers import (
     TableSerializer,
     PlayerCharacterSerializer, CampainSerializer,
     ItemsSerializer, ItemsPCSerializer,
     CampainItemsSerializer,
     )
+from .serializers_collections import (
+    CollectionsSerializer,
+)
 from .permissions import IsOwner, IsGuestOrOwner
 from .helpers import guests_create_or_not, is_game_master, is_player
 
@@ -110,8 +120,6 @@ class TableViewSet(viewsets.ModelViewSet):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated, IsOwner])
 def switch_guest_owner(request):
-    print("=== table id: ", request.data.get('table_id'))
-    print(request.POST)
     table = Table.objects.get(id=request.data.get('table_id'))
     user = User.objects.get(id=request.data.get('user_id'))
     message = ""
@@ -151,7 +159,6 @@ class CampainViewSet(viewsets.ViewSet):
         try:
             campain.full_clean()
         except Exception as e:
-            print("=== exception: ", e)
             return Response({"errors": [message]}, status=400)
         campain.save()
         return Response({"message": "Campain created"})
@@ -163,16 +170,23 @@ class CampainViewSet(viewsets.ViewSet):
 
     def retrieve(self, request, pk=None):
         campain = Campain.objects.get(id=pk)
-        serializer = CampainItemsSerializer(campain, context={'request': request})
-        return Response(serializer.data)
+        campain_serializer = CampainItemsSerializer(campain, context={'request': request})
+        datas = {
+            'campain': campain_serializer.data,
+            'collection': None,
+            }
+        if campain.parent_collection:
+            collection = campain.parent_collection
+            collection_serializer = CollectionsSerializer(collection, context={'request': request})
+            datas['collection'] = collection_serializer.data
+
+        return Response(datas)
 
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def update_campain(request):
     """At least a campain id must be provided in the request data"""
-
-    print("=== request.data: ", request.data)
     try:
         id = request.data['campain_id']
         campain = Campain.objects.get(id=id)

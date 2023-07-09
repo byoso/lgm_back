@@ -8,7 +8,6 @@ from .models_abstract import (
     AbstractPC,
     AbstractCampain,
     LANGUAGES,
-    RATINGS,
     )
 
 User = get_user_model()
