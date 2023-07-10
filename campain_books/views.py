@@ -158,7 +158,7 @@ class CampainViewSet(viewsets.ViewSet):
             )
         try:
             campain.full_clean()
-        except Exception as e:
+        except Exception:
             return Response({"errors": [message]}, status=400)
         campain.save()
         return Response({"message": "Campain created"})
@@ -227,7 +227,7 @@ def update_campain(request):
 def get_campains_for_table(request):
     table = Table.objects.get(id=request.GET.get('table_id'))
     campains = table.table_campains.all()
-    serializer = CampainSerializer(campains, many=True)
+    serializer = CampainSerializer(campains, many=True, context={'request': request})
     return Response(serializer.data)
 
 

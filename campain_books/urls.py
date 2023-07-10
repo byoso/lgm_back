@@ -7,6 +7,7 @@ from . import (
     views,
     views_collections as vc,
     views_exchange as ve,
+    views_rating as vr,
     )
 
 router = DefaultRouter()
@@ -41,4 +42,6 @@ urlpatterns = [
 
     path('exchanges_loading/', ve.exchangesLoading.as_view(), name='exchanges_loading'),
     path('apply_exchanges/', ve.ApplyExchanges.as_view(), name='apply_exchanges'),
+
+    path('ratings/', vr.Ratings.as_view(), name='ratings'),
 ]

@@ -32,8 +32,8 @@ class CollectionsSerializer(ModelSerializer):
 
     def get_voted(self, obj):
         user = self.context['request'].user
-        rating = Rating.objects.get(collection=obj)
-        if rating.voters == user:
+        # rating = Rating.objects.get(collection=obj)
+        if obj.rating.voters.filter(id=user.id):
             return True
         return False
 

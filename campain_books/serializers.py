@@ -2,11 +2,12 @@ from django.db.models import Q
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Table, Campain, PlayerCharacter, Item
 
 from django_silly_auth.serializers import UserInfosSerializer
 
+from .models import Table, Campain, PlayerCharacter, Item, Collection
 from .helpers import is_game_master, is_player
+from .serializers_collections import CollectionsSerializer
 
 User = get_user_model()
 
@@ -72,6 +73,7 @@ class CampainSerializer(ModelSerializer):
     game_master = UserInfosSerializer(read_only=True)
     title = serializers.CharField(required=True, max_length=31)
     description = serializers.CharField(required=False, max_length=31)
+    parent_collection = SerializerMethodField()
 
     class Meta:
         model = Campain
@@ -89,11 +91,22 @@ class CampainSerializer(ModelSerializer):
             'is_official',
             'official_url',
             'is_copy_free',
+            'parent_collection',
             )
         read_only_fields = [
             'id', 'date_created', 'date_updated',
             'is_official', 'official_url',
+            'parent_collection',
             ]
+
+    def get_parent_collection(self, obj):
+        print('obj in serializer :', obj.parent_collection)
+        parent_collection = obj.parent_collection
+        serializer = CollectionsSerializer(
+            parent_collection,
+            context={'request': self.context['request']},
+            )
+        return serializer.data
 
 
 class CampainItemsSerializer(ModelSerializer):
