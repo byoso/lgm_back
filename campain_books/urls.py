@@ -44,4 +44,7 @@ urlpatterns = [
     path('apply_exchanges/', ve.ApplyExchanges.as_view(), name='apply_exchanges'),
 
     path('ratings/', vr.Ratings.as_view(), name='ratings'),
+
+    # subscriptions
+    path('subscriptions/', include('subscriptions.urls')),
 ]

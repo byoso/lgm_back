@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     # local
     '_users',
     'campain_books',
+    'subscriptions',
 ]
 
 MIDDLEWARE = [
