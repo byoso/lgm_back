@@ -8,6 +8,7 @@ cryptography==40.0.1
 defusedxml==0.7.1
 Django==4.2
 django-cors-headers==3.14.0
+django-dotenv==1.4.2
 django-rest-framework==0.1.0
 django-silly-auth==1.1.2
 django-templated-mail==1.1.1

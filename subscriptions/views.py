@@ -11,13 +11,13 @@ stripe.api_key = secret_key
 class CreateCheckoutSession(APIView):
     def post(self, request):
         price_id = request.data.get("priceId")
-        success_url = request.build_absolute_uri(reverse('webhook'))
 
         try:
             session = stripe.checkout.Session.create(
-                success_url=success_url,
+                customer='cus_OFZMIvPNMVVAsz',
+                success_url='http://localhost:8080/?#/account',
                 # success_url='https://example.com/success.html?session_id={CHECKOUT_SESSION_ID}',
-                cancel_url='https://example.com/canceled.html',
+                cancel_url='http://localhost:8080/?#/account',
                 mode='subscription',
                 line_items=[{
                     'price': price_id,
@@ -26,11 +26,12 @@ class CreateCheckoutSession(APIView):
                 }],
             )
             print('session id: ', session.id)
+            print('session : ', session)
         except Exception as e:
             print(e)
             return Response({"message": "Backend error in a stripe session creation"}, 400)
 
-        return Response({"message": "Subscription successfully done !"})
+        return Response({"message": "Subscription parameters sent to build the checkout page"})
 
     def get(self, request):
         pass
