@@ -19,11 +19,12 @@ ENV = os.environ.get('ENV', 'dev')
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # for vue.js spa development
-# CORS_ALLOWED_ORIGINS = [
-#     # Vue.js site
-#     "http://localhost:8080",
-# ]
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    # Vue.js site
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
+]
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -40,9 +41,8 @@ if DEBUG:
     ALLOWED_HOSTS += [os.environ.get('ALLOWED_HOST')]
 
 
-# Application definition
-
 INSTALLED_APPS = [
+    'django_silly_stripe',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -185,4 +185,17 @@ SILLY_AUTH = {
         'groups', 'user_permissions', 'last_login', 'is_confirmed',
         'first_name', 'last_name',
     ]
+}
+
+SILLY_STRIPE = {
+    'AUTO_SET': 'SPA',  # 'CLASSIC' or 'SPA'
+    'DSS_SECRET_KEY': os.environ.get('DSS_SECRET_KEY'),
+    'DSS_PUBLIC_KEY': os.environ.get('DSS_PUBLIC_KEY'),
+    # 'DSS_RESTRICTED_KEY': 'rk_xxxxxx',  # optionnal
+    'DSS_WEBHOOK_SECRET': os.environ.get('DSS_WEBHOOK_SECRET'),
+    'SUBSCRIPTION_CANCEL': 'NOW',  # 'NOW' or 'PERIOD'
+    'SUCCESS_URL': 'http://localhost:8080/?#/account',
+    'CANCEL_URL': 'http://localhost:8080/?#/account',
+    'PORTAL_BACK_URL': 'http://localhost:8080/?#/account',
+
 }

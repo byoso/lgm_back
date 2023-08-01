@@ -20,5 +20,6 @@ from django.conf.urls import include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('django_silly_auth.urls')),
+    path('', include('django_silly_stripe.urls')),
     path('campains/', include('campain_books.urls')),
 ]
