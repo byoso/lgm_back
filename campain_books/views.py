@@ -229,8 +229,8 @@ def update_campain(request):
         campain.is_copy_free = request.data['is_copy_free']
 
     campain.save()
-
-    serializer = CampainSerializer(campain)
+    context = {'request': request}
+    serializer = CampainSerializer(campain, context=context)
     return Response(serializer.data)
 
 

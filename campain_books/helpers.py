@@ -22,18 +22,18 @@ def is_player(user, pc):
     """Check if a user is the player of a PC"""
     return pc.user == user
 
-
-def add_table_guest(table, guest):
-    """Add a new guest to all the campains of a table"""
-    for campain in table.table_campains.all():
-        if not campain.pcs.filter(user=guest).exists():
-            print(f"add {guest.username} to {campain.title}")
-            pc = PlayerCharacter.objects.create(
-                user=guest,
-                character_name="< anonymous PC >"
-                )
-            campain.pcs.add(pc)
-            campain.save()
+# DELETE
+# def add_table_guest(table, guest):
+#     """Add a new guest to all the campains of a table"""
+#     for campain in table.table_campains.all():
+#         if not campain.pcs.filter(user=guest).exists():
+#             print(f"add {guest.username} to {campain.title}")
+#             pc = PlayerCharacter.objects.create(
+#                 user=guest,
+#                 character_name="< anonymous PC >"
+#                 )
+#             campain.pcs.add(pc)
+#             campain.save()
 
 
 def remove_table_guest(table, guest):
@@ -101,7 +101,7 @@ def guests_create_or_not(
         else:
             guest = User.objects.get(email=guest_email)
         table.guests.add(guest)
-        add_table_guest(table, guest)
+        # DELETE add_table_guest(table, guest)
 
     # remove unneeded guests
     for guest in table.guests.all():
