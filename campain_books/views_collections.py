@@ -30,10 +30,12 @@ from .serializers_collections import (
     CollectionPCSerializer
     )
 
+from subscriptions.permissions import IsSubscriber
+
 
 class SharedCollections(GenericAPIView):
     """Responds to the research of a collection by title, author or game"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsSubscriber]
     pagination_class = CollectionsPagination
     serializer_class = CollectionsSerializer
 
@@ -79,7 +81,7 @@ class SharedCollections(GenericAPIView):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsSubscriber])
 def create_campain_from_collection(request):
     """Create a campain from a collection
     requires collection_id, table_id and some datas
@@ -151,6 +153,8 @@ def favorite_collection(request):
         serializer = CollectionsSerializer(collections, many=True, context={'request': request})
         return Response(serializer.data)
     elif request.method == 'POST':
+        if not request.user.is_subscriber:
+            return Response({'message': 'Subscribers only'}, 403)
         collection = Collection.objects.get(id=request.data['collection_id'])
         if collection.fav_users.filter(id=user.id).exists():
             return Response({'message': 'already in favs'})
@@ -170,6 +174,8 @@ def favorite_collection(request):
 @permission_classes([IsAuthenticated])
 def collections_crud(request):
     if request.method == 'POST':
+        if not request.user.is_subscriber:
+            return Response({'message': 'Subscribers only'}, 403)
         user = request.user
         date_now = date.today()
         history = f"{date_now} - Created by {user.username}"
@@ -198,6 +204,8 @@ def collections_crud(request):
             })
 
     if request.method == 'DELETE':
+        if not request.user.is_subscriber:
+            return Response({'message': 'Subscribers only'}, 403)
         if 'id' not in request.data:
             return Response({'message': 'id is required'}, status=400)
         id = request.data['id']
@@ -210,6 +218,8 @@ def collections_crud(request):
         return Response({'message': 'ressource deleted'}, status=200)
 
     if request.method == 'PUT':
+        if not request.user.is_subscriber:
+            return Response({'message': 'Subscribers only'}, 403)
         if 'id' not in request.data:
             return Response({'message': 'id is required'}, status=400)
         id = request.data['id']

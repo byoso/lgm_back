@@ -33,6 +33,8 @@ from .serializers_collections import (
 from .permissions import IsOwner, IsGuestOrOwner
 from .helpers import guests_create_or_not, is_game_master, is_player
 
+from subscriptions.permissions import IsSubscriber
+
 User = get_user_model()
 
 
@@ -87,6 +89,8 @@ class TableViewSet(viewsets.ModelViewSet):
         return Table.objects.filter(owners=user)
 
     def perform_create(self, serializer):
+        if not self.request.user.is_subscriber:
+            return Response({"message": "Subscriber only"}, 403)
         if serializer.is_valid():
             table = serializer.save()
             table.owners.add(self.request.user)
@@ -101,6 +105,8 @@ class TableViewSet(viewsets.ModelViewSet):
         raise ValidationError(serializer.errors)
 
     def perform_update(self, serializer):
+        if not self.request.user.is_subscriber:
+            return Response({"message": "Subscriber only"}, 403)
         if serializer.is_valid():
             table = serializer.save()
 
@@ -114,6 +120,8 @@ class TableViewSet(viewsets.ModelViewSet):
         raise ValidationError(serializer.errors)
 
     def perform_destroy(self, instance):
+        if not instance.owners.filter(id=self.request.user.id).exists():
+            return Response({"message": "Table owner only"}, 403)
         instance.delete()
 
 
@@ -142,6 +150,8 @@ class CampainViewSet(viewsets.ViewSet):
 
     @transaction.atomic
     def create(self, request):
+        if not request.user.is_subscriber:
+            return Response({"message": "Subscriber only"}, 403)
         message = (
             "Invalid form, be sure the title, the "
             "description, and the charater names do not exceed "
@@ -164,6 +174,8 @@ class CampainViewSet(viewsets.ViewSet):
         return Response({"message": "Campain created"})
 
     def destroy(self, request, pk=None):
+        if not request.user.is_subscriber:
+            return Response({"message": "Subscriber only"}, 403)
         campain = Campain.objects.get(id=pk)
         campain.delete()
         return Response({"message": "Campain deleted"})
@@ -247,11 +259,16 @@ def create_item(request):
         locked = False
         date_unlocked = datetime.now()
 
+    if request.user.is_subscriber:
+        item_type = request.data['type']
+    else:
+        item_type = "MEMO"
+
     item = Item(
         name=request.data['title'],
         campain=Campain.objects.get(id=request.data['campainId']),
         image_url=request.data['image_url'],
-        type=request.data['type'],
+        type=item_type,
         data_pc=request.data['pcsInfos'],
         data_gm=request.data['gmInfos'],
         locked=locked,
@@ -329,7 +346,7 @@ def delete_item(request):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsSubscriber])
 def create_pc(request):
     """
     Expects a campain id and a name.

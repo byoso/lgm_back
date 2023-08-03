@@ -26,11 +26,12 @@ from .serializers_collections import (
 from .serializers import (
     CampainItemsSerializer,
 )
+from subscriptions.permissions import IsSubscriber
 
 
 class exchangesLoading(GenericAPIView):
     """Serves the exchangeable objects: campains and collections"""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsSubscriber]
     serializer_class = CampainExchangesMiniSerializer
 
     def get(self, request):

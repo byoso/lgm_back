@@ -189,6 +189,7 @@ SILLY_AUTH = {
 
 SILLY_STRIPE = {
     'AUTO_SET': 'SPA',  # 'CLASSIC' or 'SPA'
+    'USE_SUBSCRIPTIONS_CANCEL': False,
     'DSS_SECRET_KEY': os.environ.get('DSS_SECRET_KEY'),
     'DSS_PUBLIC_KEY': os.environ.get('DSS_PUBLIC_KEY'),
     # 'DSS_RESTRICTED_KEY': 'rk_xxxxxx',  # optionnal
@@ -197,5 +198,6 @@ SILLY_STRIPE = {
     'SUCCESS_URL': 'http://localhost:8080/?#/account',
     'CANCEL_URL': 'http://localhost:8080/?#/account',
     'PORTAL_BACK_URL': 'http://localhost:8080/?#/account',
+    # 'PRINT_DEV_LOGS': True,
 
 }
