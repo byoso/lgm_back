@@ -221,6 +221,8 @@ def update_campain(request):
             return Response({"message": "Invalid language"}, status=400)
         else:
             campain.language = request.data['language']
+    if 'is_ended' in request.data:
+        campain.is_ended = request.data['is_ended']
     if 'description' in request.data:
         campain.description = request.data['description']
     if 'image_url' in request.data:
