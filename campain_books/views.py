@@ -1,4 +1,5 @@
 from datetime import datetime
+from pprint import pprint
 
 from django.db.models import Q
 from django.contrib.auth import get_user_model
@@ -61,9 +62,13 @@ def dashboard(request):
     serializer = TableSerializer(tables_as_owner, many=True)
     tables_as_guest = Table.objects.filter(guests=request.user)
     serializer2 = TableSerializer(tables_as_guest, many=True)
+    tables_as_gm = Table.objects.filter(game_masters=request.user)
+    serializer3 = TableSerializer(tables_as_gm, many=True)
 
     data["tables_as_owner"] = serializer.data
     data["tables_as_guest"] = serializer2.data
+    data["tables_as_gm"] = serializer3.data
+    pprint(data)
 
     return Response(data)
 
@@ -123,6 +128,46 @@ class TableViewSet(viewsets.ModelViewSet):
         if not instance.owners.filter(id=self.request.user.id).exists():
             return Response({"message": "Table owner only"}, 403)
         instance.delete()
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated, IsOwner])
+def swith_guest_GM(request):
+    table = Table.objects.get(id=request.data.get('table_id'))
+    user = User.objects.get(id=request.data.get('user_id'))
+    message = ""
+    if user in table.game_masters.all():
+        table.game_masters.remove(user)
+        table.guests.add(user)
+        message = f"user { user.username } switched to guest"
+    elif user in table.guests.all():
+        table.guests.remove(user)
+        table.game_masters.add(user)
+        message = f"user { user.username } switched to game master"
+    else:
+        raise ValidationError("Impossible to perform this action.")
+    serializer = TableSerializer(table)
+    return Response({"message": message, "table": serializer.data})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated, IsOwner])
+def switch_GM_owner(request):
+    table = Table.objects.get(id=request.data.get('table_id'))
+    user = User.objects.get(id=request.data.get('user_id'))
+    message = ""
+    if user in table.owners.all() and table.owners.count() > 1:
+        table.owners.remove(user)
+        table.game_masters.add(user)
+        message = f"user { user.username } switched to game master"
+    elif user in table.game_masters.all():
+        table.game_masters.remove(user)
+        table.owners.add(user)
+        message = f"user { user.username } switched to owner"
+    else:
+        raise ValidationError("Impossible to perform this action.")
+    serializer = TableSerializer(table)
+    return Response({"message": message, "table": serializer.data})
 
 
 @api_view(['POST'])

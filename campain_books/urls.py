@@ -21,7 +21,11 @@ urlpatterns = [
     path('get_tables_as_owner/', views.get_tables_as_owner, name='get_tables_as_owner'),
     path('get_tables_as_user/', views.get_tables_as_user, name='get_tables_as_user'),
     path('get_table_datas/', views.get_table_datas, name='get_table_datas'),
-    path('switch_guest_owner/', views.switch_guest_owner, name='switch_guest_owner'),
+
+    # path('switch_guest_owner/', views.switch_guest_owner, name='switch_guest_owner'),
+    path('swith_guest_GM/', views.swith_guest_GM, name='swith_guest_GM'),
+    path('switch_GM_owner/', views.switch_GM_owner, name='switch_GM_owner'),
+
     path('get_campains_for_table/', views.get_campains_for_table, name='get_campains_for_table'),
     path('update_campain/', views.update_campain, name='update_campain'),
     path('items/create/', views.create_item, name='create_item'),

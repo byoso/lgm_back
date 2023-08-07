@@ -95,7 +95,7 @@ def create_campain_from_collection(request):
     if not collection.is_shared and collection.author != user:
         return Response({'message': 'This collection is not shared'}, 403)
     table_id = request.data['table_id']
-    if not Table.objects.filter(Q(id=table_id) & Q(owners=user)).exists():
+    if not Table.objects.filter(Q(id=table_id) & (Q(owners=user) | Q(game_masters=user))).exists():
         return Response({'message': 'you cant modify this table'}, 403)
 
     # create the campain
@@ -196,7 +196,7 @@ def collections_crud(request):
         user = request.user
         collections = Collection.objects.filter(author=user)
         collections_serializer = CollectionsSerializer(collections, many=True, context={'request': request})
-        tables = Table.objects.filter(owners=user)
+        tables = Table.objects.filter(Q(owners=user) | Q(game_masters=user))
         tables_serializer = TableMiniSerializer(tables, many=True)
         return Response({
             'collections': collections_serializer.data,

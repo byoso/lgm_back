@@ -62,7 +62,7 @@ class exchangesLoading(GenericAPIView):
 
 
 class ApplyExchanges(GenericAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsSubscriber]
 
     def post(self, request):
         exchanges = request.data['exchanges']
@@ -236,7 +236,6 @@ class ApplyExchanges(GenericAPIView):
             serializer_b = CampainItemsSerializer(source_b, context={'request': request})
         if b_type == 'collection':
             serializer_b = CollectionsFullSerializer(source_b)
-
 
         # return Response({'message': 'ok'})
         return Response({

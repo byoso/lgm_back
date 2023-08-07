@@ -25,12 +25,17 @@ class Table(models.Model):
         related_name='tables_owned',
         blank=True,
     )
-    description = models.TextField(blank=True, null=True)
+    game_masters = models.ManyToManyField(
+        to=User,
+        related_name='tables_gm',
+        blank=True,
+    )
     guests = models.ManyToManyField(
         to=User,
         related_name='tables',
         blank=True,
         )
+    description = models.TextField(blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
 

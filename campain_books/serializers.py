@@ -19,6 +19,7 @@ class TableMiniSerializer(ModelSerializer):
 
 class TableSerializer(ModelSerializer):
     owners = UserInfosSerializer(read_only=True, many=True)
+    game_masters = UserInfosSerializer(read_only=True, many=True)
     guests = UserInfosSerializer(read_only=True, many=True)
 
     class Meta:
@@ -28,6 +29,7 @@ class TableSerializer(ModelSerializer):
             'name',
             'description',
             'owners',
+            'game_masters',
             'guests',
         ]
 
