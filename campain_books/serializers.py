@@ -4,6 +4,7 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
 from django_silly_auth.serializers import UserInfosSerializer
+from django_silly_stripe.helpers import dev_log
 
 from .models import Table, Campain, PlayerCharacter, Item, Collection
 from .helpers import is_game_master, is_player
@@ -16,6 +17,7 @@ class TableMiniSerializer(ModelSerializer):
     class Meta:
         model = Table
         fields = ['id', 'name']
+
 
 class TableSerializer(ModelSerializer):
     owners = UserInfosSerializer(read_only=True, many=True)
@@ -102,7 +104,7 @@ class CampainSerializer(ModelSerializer):
             ]
 
     def get_parent_collection(self, obj):
-        print('obj in serializer :', obj.parent_collection)
+        dev_log('obj in serializer :', obj.parent_collection)
         parent_collection = obj.parent_collection
         serializer = CollectionsSerializer(
             parent_collection,

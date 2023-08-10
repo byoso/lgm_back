@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .models import (
-    Rating,
+    # Rating,
     Collection,
 )
 from .serializers_collections import CollectionsSerializer

@@ -1,9 +1,8 @@
 from datetime import datetime
-from pprint import pprint
 
-from django.db.models import Q
+# from django.db.models import Q
 from django.contrib.auth import get_user_model
-from django.template.loader import get_template
+# from django.template.loader import get_template
 from django.conf import settings
 from django.db import transaction
 
@@ -11,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ValidationError
-from rest_framework import serializers
+# from rest_framework import serializers
 from rest_framework import viewsets
 
 from .models import (
@@ -20,7 +19,7 @@ from .models import (
     PlayerCharacter,
     Item,
     LANGUAGES,
-    Collection,
+    # Collection,
     )
 from .serializers import (
     TableSerializer,
@@ -68,7 +67,6 @@ def dashboard(request):
     data["tables_as_owner"] = serializer.data
     data["tables_as_guest"] = serializer2.data
     data["tables_as_gm"] = serializer3.data
-    pprint(data)
 
     return Response(data)
 
@@ -84,7 +82,7 @@ def get_table_datas(request):
 
 
 class TableViewSet(viewsets.ModelViewSet):
-    """Handle actions on tables but"""
+    """Handle actions on tables"""
     queryset = Table.objects.all()
     serializer_class = TableSerializer
     permission_classes = [IsAuthenticated, IsGuestOrOwner]
@@ -93,6 +91,7 @@ class TableViewSet(viewsets.ModelViewSet):
         user = self.request.user
         return Table.objects.filter(owners=user)
 
+    @transaction.atomic
     def perform_create(self, serializer):
         if not self.request.user.is_subscriber:
             return Response({"message": "Subscriber only"}, 403)
@@ -107,8 +106,8 @@ class TableViewSet(viewsets.ModelViewSet):
                 serializer=serializer,
                 )
             return Response(response_datas)
-        raise ValidationError(serializer.errors)
 
+    @transaction.atomic
     def perform_update(self, serializer):
         if not self.request.user.is_subscriber:
             return Response({"message": "Subscriber only"}, 403)
@@ -122,7 +121,6 @@ class TableViewSet(viewsets.ModelViewSet):
                 serializer=serializer,
                 )
             return Response(response_datas)
-        raise ValidationError(serializer.errors)
 
     def perform_destroy(self, instance):
         if not instance.owners.filter(id=self.request.user.id).exists():
@@ -132,7 +130,7 @@ class TableViewSet(viewsets.ModelViewSet):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated, IsOwner])
-def swith_guest_GM(request):
+def switch_guest_GM(request):
     table = Table.objects.get(id=request.data.get('table_id'))
     user = User.objects.get(id=request.data.get('user_id'))
     message = ""
@@ -170,26 +168,6 @@ def switch_GM_owner(request):
     return Response({"message": message, "table": serializer.data})
 
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated, IsOwner])
-def switch_guest_owner(request):
-    table = Table.objects.get(id=request.data.get('table_id'))
-    user = User.objects.get(id=request.data.get('user_id'))
-    message = ""
-    if user in table.owners.all() and table.owners.count() > 1:
-        table.owners.remove(user)
-        table.guests.add(user)
-        message = f"user { user.username } switched to guest"
-    elif user in table.guests.all():
-        table.guests.remove(user)
-        table.owners.add(user)
-        message = f"user { user.username } switched to owner"
-    else:
-        raise ValidationError("Impossible to perform this action.")
-    serializer = TableSerializer(table)
-    return Response({"message": message, "table": serializer.data})
-
-
 class CampainViewSet(viewsets.ViewSet):
     """Handle actions on campains"""
 
@@ -203,12 +181,12 @@ class CampainViewSet(viewsets.ViewSet):
             "31 characters each."
         )
         campain = Campain(
-            title=request.data['title'],
-            game=request.data['game'],
+            title=request.data['title'].strip(),
+            game=request.data['game'].strip(),
             image_url=request.data['image_url'],
             language=request.data['language'],
             table=Table.objects.get(id=request.data['table_id']),
-            description=request.data['description'],
+            description=request.data['description'].strip(),
             game_master=request.user,
             )
         try:
@@ -242,6 +220,7 @@ class CampainViewSet(viewsets.ViewSet):
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
+@transaction.atomic
 def update_campain(request):
     """At least a campain id must be provided in the request data"""
     try:
@@ -252,15 +231,15 @@ def update_campain(request):
     if not is_game_master(request.user, campain):
         return Response({"message": "Game master only"}, status=400)
     if 'title' in request.data:
-        if request.data['title'] == "":
+        if request.data['title'].strip() == "":
             return Response({"message": "You must choose a title"}, status=400)
         else:
-            campain.title = request.data['title']
+            campain.title = request.data['title'].strip()
     if 'game' in request.data:
-        if request.data['game'] == "":
+        if request.data['game'].strip() == "":
             return Response({"message": "You must choose a game"}, status=400)
         else:
-            campain.game = request.data['game']
+            campain.game = request.data['game'].strip()
     if 'language' in request.data:
         if request.data['language'] not in map(lambda x: x[0], LANGUAGES):
             return Response({"message": "Invalid language"}, status=400)
@@ -269,7 +248,7 @@ def update_campain(request):
     if 'is_ended' in request.data:
         campain.is_ended = request.data['is_ended']
     if 'description' in request.data:
-        campain.description = request.data['description']
+        campain.description = request.data['description'].strip()
     if 'image_url' in request.data:
         campain.image_url = request.data['image_url']
     if 'is_copy_free' in request.data and campain.is_copy_free:
@@ -292,6 +271,7 @@ def get_campains_for_table(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@transaction.atomic
 def create_item(request):
     # if request.data['title'] == "":
     #     return Response({"message": "You must choose a title"}, status=400)
@@ -312,12 +292,12 @@ def create_item(request):
         item_type = "MEMO"
 
     item = Item(
-        name=request.data['title'],
+        name=request.data['title'].strip(),
         campain=Campain.objects.get(id=request.data['campainId']),
         image_url=request.data['image_url'],
         type=item_type,
-        data_pc=request.data['pcsInfos'],
-        data_gm=request.data['gmInfos'],
+        data_pc=request.data['pcsInfos'].strip(),
+        data_gm=request.data['gmInfos'].strip(),
         locked=locked,
         date_unlocked=date_unlocked,
         )
@@ -327,6 +307,7 @@ def create_item(request):
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
+@transaction.atomic
 def update_item(request):
     """
     Expects an id and the fields to update.
@@ -345,16 +326,16 @@ def update_item(request):
         return Response({"message": "Game Master only !"}, status=403)
 
     if 'name' in request.data:
-        item.name = request.data['name']
+        item.name = request.data['name'].strip()
     if 'image_url' in request.data:
         item.image_url = request.data['image_url']
     if 'type' in request.data:
         item.type = request.data['type']
     if 'data_pc' in request.data:
-        item.data_pc = request.data['data_pc']
+        item.data_pc = request.data['data_pc'].strip()
     if 'data_gm' in request.data:
         if is_game_master(request.user, campain):
-            item.data_gm = request.data['data_gm']
+            item.data_gm = request.data['data_gm'].strip()
     if 'locked' in request.data:
         item.locked = request.data['locked']
         if item.locked:
@@ -394,6 +375,7 @@ def delete_item(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated, IsSubscriber])
+@transaction.atomic
 def create_pc(request):
     """
     Expects a campain id and a name.
@@ -407,12 +389,12 @@ def create_pc(request):
         else:
             user = None
     pc = PlayerCharacter(
-        name=request.data['name'],
+        name=request.data['name'].strip(),
         campain=Campain.objects.get(id=request.data['campain_id']),
         image_url=request.data['image_url'],
-        data_pc=request.data['data_pc'],
-        data_player=request.data['data_player'],
-        data_gm=request.data['data_gm'],
+        data_pc=request.data['data_pc'].strip(),
+        data_player=request.data['data_player'].strip(),
+        data_gm=request.data['data_gm'].strip(),
         user=user,
         )
     pc.save()
@@ -422,6 +404,7 @@ def create_pc(request):
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
+@transaction.atomic
 def update_pc(request):
     """
     Expects an id and the fields to update.
@@ -438,16 +421,16 @@ def update_pc(request):
 
     if is_player(request.user, pc) or is_game_master(request.user, campain):
         if 'name' in request.data:
-            pc.name = request.data['name']
+            pc.name = request.data['name'].strip()
         if 'image_url' in request.data:
             pc.image_url = request.data['image_url']
         if 'data_pc' in request.data:
-            pc.data_pc = request.data['data_pc']
+            pc.data_pc = request.data['data_pc'].strip()
         if 'data_player' in request.data:
-            pc.data_player = request.data['data_player']
+            pc.data_player = request.data['data_player'].strip()
         if is_game_master(request.user, campain):
             if 'data_gm' in request.data:
-                pc.data_gm = request.data['data_gm']
+                pc.data_gm = request.data['data_gm'].strip()
             if 'player_id' in request.data:
                 if User.objects.filter(id=request.data['player_id']).exists():
                     pc.user = User.objects.get(id=request.data['player_id'])
@@ -474,3 +457,22 @@ def delete_pc(request):
         return Response({"message": "Game Master only !"}, status=403)
     pc.delete()
     return Response({"message": "ok"})
+
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def switch_end_campain(request):
+    user = request.user
+    campain_id = request.data['campain_id']
+    table_id = request.data['table_id']
+    try:
+        campain = Campain.objects.get(id=campain_id)
+    except Campain.DoesNotExist or Table.DoesNotExist:
+        return Response({"message": "Ressource does not exist"}, status=400)
+    if not is_game_master(user, campain) and not Table.objects.filter(id=table_id, owners=user).exists():
+        return Response({"message": "Game Master or owner only !"}, status=403)
+
+    campain.is_ended = not campain.is_ended
+    campain.save()
+
+    return Response({"message": "campain modified"})

@@ -1,5 +1,5 @@
-import pprint
-from django.db.models import Q
+# from django.db.models import Q
+from django.db import transaction
 
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -64,9 +64,9 @@ class exchangesLoading(GenericAPIView):
 class ApplyExchanges(GenericAPIView):
     permission_classes = [IsAuthenticated, IsSubscriber]
 
+    @transaction.atomic
     def post(self, request):
         exchanges = request.data['exchanges']
-        pprint.pprint(exchanges)
         user = request.user
         a_type = exchanges['a_type']
         b_type = exchanges['b_type']
@@ -91,7 +91,6 @@ class ApplyExchanges(GenericAPIView):
                 )
 
         exchanges_are_valid = check_before_exchanges(user, source_a, source_b, exchanges)
-        print("exchanges allowed ?: ", exchanges_are_valid)
         if not exchanges_are_valid:
             return Response(
                 {'message': 'requested exchanges are  not allowed'},
@@ -225,7 +224,6 @@ class ApplyExchanges(GenericAPIView):
             created_copies.append(copy)
 
         for copy in created_copies:
-            print("copy to save: ", copy)
             copy.save()
 
         if a_type == 'campain':

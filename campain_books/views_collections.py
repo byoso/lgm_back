@@ -1,6 +1,7 @@
 from datetime import date
 
 from django.db.models import Q
+from django.db import transaction
 
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -82,6 +83,7 @@ class SharedCollections(GenericAPIView):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated, IsSubscriber])
+@transaction.atomic
 def create_campain_from_collection(request):
     """Create a campain from a collection
     requires collection_id, table_id and some datas
@@ -139,6 +141,7 @@ def create_campain_from_collection(request):
     campain.save()
     return Response({'message': 'new campain created'})
 
+
 @api_view(['GET', 'POST', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def favorite_collection(request):
@@ -170,8 +173,10 @@ def favorite_collection(request):
         return Response({'message': 'not in favs'})
     return Response({'message': 'Something gone wrong'}, 400)
 
+
 @api_view(['POST', 'GET', 'DELETE', 'PUT'])
 @permission_classes([IsAuthenticated])
+@transaction.atomic
 def collections_crud(request):
     if request.method == 'POST':
         if not request.user.is_subscriber:
@@ -261,15 +266,15 @@ def collections_crud(request):
                     return Response({'message': 'you are not the owner of this ressource'}, status=403)
                 item = items_to_update[item_id]
                 if 'name' in item:
-                    old_item.name = item['name']
+                    old_item.name = item['name'].strip()
                 if 'description' in item:
-                    old_item.description = item['description']
+                    old_item.description = item['description'].strip()
                 if 'image_url' in item:
                     old_item.image_url = item['image_url']
                 if 'data_pc' in item:
-                    old_item.data_pc = item['data_pc']
+                    old_item.data_pc = item['data_pc'].strip()
                 if 'data_gm' in item:
-                    old_item.data_gm = item['data_gm']
+                    old_item.data_gm = item['data_gm'].strip()
                 if 'type' in item:
                     old_item.type = item['type']
                 old_item.save()
@@ -306,17 +311,17 @@ def collections_crud(request):
                     return Response({'message': 'you are not the owner of this ressource'}, status=403)
                 pc = pcs_to_update[pc_id]
                 if 'name' in pc:
-                    old_pc.name = pc['name']
+                    old_pc.name = pc['name'].strip()
                 if 'description' in pc:
-                    old_pc.description = pc['description']
+                    old_pc.description = pc['description'].strip()
                 if 'image_url' in pc:
                     old_pc.image_url = pc['image_url']
                 if 'data_pc' in pc:
-                    old_pc.data_pc = pc['data_pc']
+                    old_pc.data_pc = pc['data_pc'].strip()
                 if 'data_player' in pc:
-                    old_pc.data_player = pc['data_player']
+                    old_pc.data_player = pc['data_player'].strip()
                 if 'data_gm' in pc:
-                    old_pc.data_gm = pc['data_gm']
+                    old_pc.data_gm = pc['data_gm'].strip()
                 old_pc.save()
 
         # Handle the collection

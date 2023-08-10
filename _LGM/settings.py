@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     '_users',
     'campain_books',
     'subscriptions',
+    'home',
 ]
 
 MIDDLEWARE = [
@@ -129,11 +130,11 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
-LANGUAGE_CODE = 'fr-FR'
+LANGUAGE_CODE = 'en-US'
 
 TIME_ZONE = 'Europe/Paris'
 
-USE_I18N = True
+USE_I18N = False
 
 USE_TZ = False
 
@@ -198,6 +199,6 @@ SILLY_STRIPE = {
     'SUCCESS_URL': 'http://localhost:8080/?#/account',
     'CANCEL_URL': 'http://localhost:8080/?#/account',
     'PORTAL_BACK_URL': 'http://localhost:8080/?#/account',
-    # 'PRINT_DEV_LOGS': True,
+    'PRINT_DEV_LOGS': True,
 
 }
