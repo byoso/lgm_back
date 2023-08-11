@@ -134,7 +134,7 @@ LANGUAGE_CODE = 'en-US'
 
 TIME_ZONE = 'Europe/Paris'
 
-USE_I18N = False
+USE_I18N = True  # False causes some server crashes due to django silly auth
 
 USE_TZ = False
 

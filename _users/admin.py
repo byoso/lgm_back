@@ -11,7 +11,7 @@ class UserAdmin(admin.ModelAdmin):
         'username',
         'first_name',
         'last_name',
-        'is_staff', 'is_active',
+        'is_staff', 'is_active', 'is_subscriber',
     )
     search_fields = ('email', 'username', 'first_name', 'last_name')
     ordering = ('email',)

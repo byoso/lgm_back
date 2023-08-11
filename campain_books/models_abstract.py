@@ -54,13 +54,13 @@ class AbstractItem(models.Model):
         default=uuid.uuid4,
         editable=False,
     )
-    name = models.CharField(max_length=31, blank=True, null=True)
+    name = models.CharField(max_length=31, default='')
     image_url = models.CharField(max_length=255, blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
     type = models.CharField(max_length=15, choices=TYPE_CHOICES, default='MEMO')
-    data_pc = models.TextField(blank=True, null=True)
-    data_gm = models.TextField(blank=True, null=True)  # always locked for PCs
+    data_pc = models.TextField(default='')
+    data_gm = models.TextField(default='')  # always locked for PCs
 
     class Meta:
         ordering = ('type', 'name',)

@@ -159,7 +159,7 @@ class Collection(models.Model):
     official_url = models.CharField(max_length=255, blank=True, null=True)
     is_shared = models.BooleanField(default=False)
     history = models.TextField(blank=True, null=True)
-    # if copyright, prevents cloning.
+    # if copyright, prevents cloning when False.
     is_copy_free = models.BooleanField(default=False)
 
     #  items and pcs are related_name
