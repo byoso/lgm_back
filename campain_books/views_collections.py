@@ -209,8 +209,6 @@ def collections_crud(request):
             })
 
     if request.method == 'DELETE':
-        if not request.user.is_subscriber:
-            return Response({'message': 'Subscribers only'}, 403)
         if 'id' not in request.data:
             return Response({'message': 'id is required'}, status=400)
         id = request.data['id']

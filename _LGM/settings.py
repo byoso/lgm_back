@@ -199,6 +199,6 @@ SILLY_STRIPE = {
     'SUCCESS_URL': 'http://localhost:8080/?#/account',
     'CANCEL_URL': 'http://localhost:8080/?#/account',
     'PORTAL_BACK_URL': 'http://localhost:8080/?#/account',
-    'PRINT_DEV_LOGS': True,
+    # 'PRINT_DEV_LOGS': True,
 
 }

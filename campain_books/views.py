@@ -197,9 +197,9 @@ class CampainViewSet(viewsets.ViewSet):
         return Response({"message": "Campain created"})
 
     def destroy(self, request, pk=None):
-        if not request.user.is_subscriber:
-            return Response({"message": "Subscriber only"}, 403)
         campain = Campain.objects.get(id=pk)
+        if not is_game_master(request.user, campain):
+            return Response({"message": "Subscriber only"}, 403)
         campain.delete()
         return Response({"message": "Campain deleted"})
 
