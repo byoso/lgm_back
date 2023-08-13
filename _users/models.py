@@ -15,6 +15,7 @@ class User(
     fav_collections = models.ManyToManyField(
         to='campain_books.Collection',
         related_name='fav_users',
+        blank=True,
     )
 
     def __str__(self):

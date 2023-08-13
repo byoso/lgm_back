@@ -1,0 +1,52 @@
+{% extends 'adminplus.html' %}
+
+{% block content %}
+<div class="container">
+  <h1 class="title is-4">Create a new User</h1>
+  <h2 class="subtitle">
+    This form  is useful when you want to create a new user
+    with a password properly set, but you don't want to use the normal way to create a user.
+  </h2>
+  <h2 class="subtitle">
+    Please be aware that <strong>no validators</strong> will be applied here,
+     only the database constraints will be applied.
+  </h2>
+
+  <form action="" method="post">
+    {% csrf_token %}
+    <div class="field">
+      <label class="label">username</label>
+      <div class="control">
+        <input class="input" type="text" placeholder="Username" name="username">
+      </div>
+    </div>
+    <div class="field">
+      <label class="label">email</label>
+      <div class="control">
+        <input class="input" type="text" placeholder="email" name="email">
+      </div>
+    </div>
+    <div class="field">
+      <label class="label">password</label>
+      <div class="control">
+        <input class="input" type="text" placeholder="password" name="password">
+      </div>
+    </div>
+    <label class="label">
+      is confirmed
+      <input type="checkbox" name="is_confirmed">
+    </label>
+    <label class="label">
+      is subscriber
+      <input type="checkbox" name="is_subscriber">
+    </label>
+    <a class="button" href="{% url 'adminplus:adminplus' %}">Cancel</a>
+    <input  class="button is-primary ml-4" type="submit" value="Submit">
+
+  </form>
+
+
+</div>
+
+
+{% endblock %}

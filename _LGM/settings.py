@@ -42,7 +42,7 @@ if DEBUG:
 
 
 INSTALLED_APPS = [
-    'django_silly_stripe',
+    'django_silly_adminplus',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -55,9 +55,11 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_silly_auth',
+    'django_silly_stripe',
 
     # local
     '_users',
+    '_adminplus',
     'campain_books',
     'subscriptions',
     'home',
@@ -79,7 +81,7 @@ ROOT_URLCONF = '_LGM.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -201,4 +203,8 @@ SILLY_STRIPE = {
     'PORTAL_BACK_URL': 'http://localhost:8080/?#/account',
     # 'PRINT_DEV_LOGS': True,
 
+}
+
+SILLY_ADMINPLUS = {
+    'USE_ADMINPLUS_APP': True,
 }

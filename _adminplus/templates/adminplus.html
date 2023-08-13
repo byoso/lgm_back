@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- favicon -->
+  <link rel="icon" href="">
+  <title>Admin +</title>
+  <!-- bulma -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+</head>
+<body>
+
+<style>
+  html {
+    background-color: #6bd483;
+  }
+  .content {
+    margin: 10px;
+  }
+  .navbar {
+    background-color: #407f4f;
+    border-bottom: 1px solid #dbdbdb;
+  }
+
+
+
+</style>
+
+<div id="app">
+
+  <nav class="navbar" role="navigation" aria-label="main navigation">
+      <div class="navbar-item">
+        <a href="{% url 'admin:index' %}" class="button">Django Admin</a>
+      </div>
+      <div class="navbar-item">
+        <a class="title" href="{% url 'adminplus:adminplus' %}">Admin +</a>
+      </div>
+  </nav>
+    {% for message in messages %}
+      <article class="message is-{{ message.tags }}" onclick="this.remove()">
+        <div class="message-header">
+          {{ message }}
+          <button class="delete" aria-label="delete"></button>
+        </div>
+      </article>
+    {% endfor %}
+
+
+  {% block content %}
+  <div class="content">
+    <div>
+      <h1 class="title is-4">Users</h1>
+      <a class="button" href="{% url 'adminplus:adminplus_create_user' %}">+ New user</a>
+      <hr>
+    </div>
+
+      <h1 class="title is-4">Configuration</h1>
+      <form method="post">
+        {% csrf_token %}
+        <div class="inline">
+            open subscriptions:
+
+          <input type="checkbox" name="open_subscriptions"
+          {% if configuration.open_subscriptions%}
+           checked
+          {% endif %}
+           >
+
+        </div>
+
+        <input type="submit" value="confirm" class="button is-success is-light mt-2">
+      </form>
+
+    <div>
+
+  </div>
+  {% endblock content %}
+
+
+</div>
+
+
+</body>
+
+
+</html>
