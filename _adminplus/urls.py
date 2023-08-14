@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views
+from . import views, views_api
 
 from django_silly_adminplus.config import SILLY_ADMINPLUS as conf
 
@@ -9,4 +9,6 @@ from django_silly_adminplus.config import SILLY_ADMINPLUS as conf
 urlpatterns = [
     path(conf['DSAP_PREFIX'] + 'adminplus/', views.adminplus, name='adminplus'),
     path(conf['DSAP_PREFIX'] + 'create_user/', views.create_user, name='adminplus_create_user'),
+    # Custom views
+    path(conf['DSAP_PREFIX'] + 'configuration/', views_api.ConfigurationView.as_view(), name='configuration'),
 ]

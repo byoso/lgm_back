@@ -49,9 +49,18 @@
 
   {% block content %}
   <div class="content">
-    <div>
-      <h1 class="title is-4">Users</h1>
-      <a class="button" href="{% url 'adminplus:adminplus_create_user' %}">+ New user</a>
+    <div class="columns">
+      <div class="column">
+        <h1 class="title is-4">Users</h1>
+        <a class="button" href="{% url 'adminplus:adminplus_create_user' %}">+ New user</a>
+      </div>
+      <div class="column">
+        <h1 class="title is-4">Stripe</h1>
+        <a class="button" href="{% url 'initialize_dss_from_stripe' %}">
+          Stripe: get prices & products
+        </a>
+
+      </div>
       <hr>
     </div>
 

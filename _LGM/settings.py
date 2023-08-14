@@ -193,15 +193,16 @@ SILLY_AUTH = {
 SILLY_STRIPE = {
     'AUTO_SET': 'SPA',  # 'CLASSIC' or 'SPA'
     'USE_SUBSCRIPTIONS_CANCEL': False,
+    'USE_CHECKOUT': False,  # custom checkout instead
     'DSS_SECRET_KEY': os.environ.get('DSS_SECRET_KEY'),
     'DSS_PUBLIC_KEY': os.environ.get('DSS_PUBLIC_KEY'),
     # 'DSS_RESTRICTED_KEY': 'rk_xxxxxx',  # optionnal
     'DSS_WEBHOOK_SECRET': os.environ.get('DSS_WEBHOOK_SECRET'),
-    'SUBSCRIPTION_CANCEL': 'NOW',  # 'NOW' or 'PERIOD'
+    'SUBSCRIPTION_CANCEL': 'PERIOD',  # 'NOW' or 'PERIOD'
     'SUCCESS_URL': 'http://localhost:8080/?#/account',
     'CANCEL_URL': 'http://localhost:8080/?#/account',
     'PORTAL_BACK_URL': 'http://localhost:8080/?#/account',
-    # 'PRINT_DEV_LOGS': True,
+    'PRINT_DEV_LOGS': False,
 
 }
 

@@ -22,6 +22,7 @@ def is_player(user, pc):
     """Check if a user is the player of a PC"""
     return pc.user == user
 
+
 def remove_table_guest(table, guest):
     """Remove a guest from all the campains of a table"""
     print(f"remove {guest.username} from {table.name}")

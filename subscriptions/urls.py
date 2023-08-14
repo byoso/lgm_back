@@ -16,6 +16,7 @@ from django_silly_stripe.helpers import (
 
 urlpatterns = [
     path('plans/', get_plans, name='get_plans'),
+    path('checkout/', views.checkout, name='checkout'),
 ]
 
 
