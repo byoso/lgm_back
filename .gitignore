@@ -4,3 +4,6 @@ __pycache__/
 .env
 django_silly_stripe/
 *.sqlite3
+
+*.nogit.txt
+0_notes/
