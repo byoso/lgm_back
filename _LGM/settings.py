@@ -134,11 +134,11 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-US'
 
-TIME_ZONE = 'Europe/Paris'
+TIME_ZONE = 'UTC'
 
 USE_I18N = False
 
-USE_TZ = False
+USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
@@ -181,8 +181,8 @@ AUTH_USER_MODEL = '_users.User'
 
 SILLY_AUTH = {
     "SITE_NAME": "RPGAdventure.eu",
-    "AUTO_SET": "SPA",
-    "SPA_EMAIL_LOGIN_LINK": "http://localhost:8080/?#/login_from_email/",
+    "AUTO_SET": "API",
+    "API_EMAIL_LOGIN_LINK": "http://localhost:8080/?#/login_from_email/",
     "USER_INFOS_EXCLUDE": [
         'password', 'is_superuser', 'is_staff', 'is_active', 'new_email',
         'groups', 'user_permissions', 'last_login', 'is_confirmed',
