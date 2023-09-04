@@ -9,7 +9,7 @@ User = get_user_model()
 
 
 def create_user(request):
-    if not request.user.is_staff and request.user.is_active:
+    if not request.user.is_superuser and request.user.is_active:
         return redirect('admin:index')
 
     if request.method == 'POST':
@@ -53,7 +53,7 @@ def create_user(request):
 
 
 def adminplus(request):
-    if not request.user.is_staff or not request.user.is_active:
+    if not request.user.is_superuser or not request.user.is_active:
         return redirect('admin:index')
 
     if request.method == 'POST':

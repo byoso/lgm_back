@@ -1,8 +1,6 @@
 from datetime import datetime
 
-# from django.db.models import Q
 from django.contrib.auth import get_user_model
-# from django.template.loader import get_template
 from django.conf import settings
 from django.db import transaction
 
@@ -10,7 +8,6 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ValidationError
-# from rest_framework import serializers
 from rest_framework import viewsets
 
 from .models import (
