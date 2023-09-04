@@ -36,7 +36,7 @@ server {
 
 
     location / {
-        root                        alias /vol/static/static;
+        root                        /vol/static/static;
         index                       index.html;
         try_files                   $uri $uri/ /index.html;
 
