@@ -1,4 +1,4 @@
-{% extends 'adminplus.html' %}
+{% extends '_adminplus/adminplus.html' %}
 
 {% block content %}
 <div class="container">
@@ -40,7 +40,7 @@
       is subscriber
       <input type="checkbox" name="is_subscriber">
     </label>
-    <a class="button" href="{% url 'adminplus:adminplus' %}">Cancel</a>
+    <a class="button" href="{% url 'adminplus' %}">Cancel</a>
     <input  class="button is-primary ml-4" type="submit" value="Submit">
 
   </form>

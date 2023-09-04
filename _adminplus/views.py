@@ -71,8 +71,15 @@ def adminplus(request):
             extra_tags="success")
 
     configuration = Configuration.objects.first()
+
+    script_name = request.META["SCRIPT_NAME"]
+    site_url = "/"
+    site_url = (
+        script_name if site_url == "/" and script_name else site_url
+        )
     context = {
         'configuration': configuration,
+        'site_url': site_url,
     }
 
-    return render(request, 'adminplus/adminplus.html', context)
+    return render(request, '_adminplus/adminplus.html', context)

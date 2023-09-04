@@ -37,13 +37,25 @@ SECRET_KEY = os.environ.get("SECRET_KEY", 'django-insecure- change this later')
 DEBUG = str(os.environ.get('DEBUG')) == "1"
 
 ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS.extend(
+    filter(
+        None,  # remove empty strings from the list
+        os.environ.get('ALLOWED_HOSTS', '').split(',')
+    )
+)
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://www.rpgadventure.eu',
+    'https://rpgadventure.eu',
+    ]
+
 
 if DEBUG:
     ALLOWED_HOSTS += [os.environ.get('ALLOWED_HOST')]
 
 
 INSTALLED_APPS = [
-    'django_silly_adminplus',
+    '_adminplus',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -57,10 +69,11 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'django_silly_auth',
     'django_silly_stripe',
+    'django_silly_adminplus',
 
     # local
     '_users',
-    '_adminplus',
+    '_deployment',
     'campain_books',
     'subscriptions',
     'home',
@@ -97,19 +110,31 @@ TEMPLATES = [
 
 WSGI_APPLICATION = '_LGM.wsgi.application'
 
-#
-# CSRF_TRUSTED_ORIGINS = ['http://*']
+
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
 
+# Database
+if os.environ.get('USE_POSTGRES', '1') == '1':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('POSTGRES_DB', 'django_pg_db'),
+            'USER': os.environ.get('POSTGRES_USER', 'postgres'),
+            'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'postgres'),
+            'HOST': os.environ.get('POSTGRES_HOST', 'db'),
+            'PORT': os.environ.get('POSTGRES_PORT', '5432'),
+        }
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
@@ -145,7 +170,19 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
+
+STATICFILES_DIRS = ['static/', ]
+
 STATIC_URL = 'static/'
+MEDIA_URL = 'cdn/'
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+
+if DEBUG:
+    STATIC_ROOT = 'staticfiles/'
+    MEDIA_ROOT = 'mediafiles/'
+else:
+    STATIC_ROOT = '/vol/web/static/'
+    MEDIA_ROOT = '/vol/web/media/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -163,20 +200,17 @@ REST_FRAMEWORK = {
 }
 
 
-## Site's email config
-EMAIL_IS_CONFIGURED = False
-
-if EMAIL_IS_CONFIGURED:
+# EMAIL
+if os.environ.get('EMAIL_IS_CONFIGURED', '0') == '1':
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-# for testing email easily and free: https://mailtrap.io/
-EMAIL_HOST = "mail03.lwspanel.com"
-EMAIL_HOST_USER = "no-reply@xxxxxx.fr"
-EMAIL_HOST_PASSWORD = "xxxxxx"
-EMAIL_PORT = 587
-# TLS/SSL is better on if available, otherwise keep it off
-EMAIL_USE_TLS = 0
+EMAIL_HOST = os.environ.get('EMAIL_HOST', "localhost")
+EMAIL_PORT = os.environ.get('EMAIL_PORT', "25")
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', "email@email.com")
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', "testpass1")
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', '0') == '1'
 
 AUTH_USER_MODEL = '_users.User'
 
@@ -204,5 +238,4 @@ SILLY_STRIPE = {
     'CANCEL_URL': 'http://localhost:8080/?#/account',
     'PORTAL_BACK_URL': 'http://localhost:8080/?#/account',
     'PRINT_DEV_LOGS': False,
-
 }

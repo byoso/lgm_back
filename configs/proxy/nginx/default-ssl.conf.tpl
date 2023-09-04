@@ -30,11 +30,16 @@ server {
         alias /vol/static/static;
     }
 
-    location /media {
+    location /cdn {
         alias /vol/static/media;
     }
 
+
     location / {
+        root                        alias /vol/static/static;
+        index                       index.html;
+        try_files                   $uri $uri/ /index.html;
+
         uwsgi_pass                  ${APP_HOST}:${APP_PORT};
         include                     /etc/nginx/uwsgi_params;
         client_max_body_size        ${MAX_UPLOAD_SIZE}M;
