@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
 from django.contrib import messages
 
-from django_silly_adminplus.config import SILLY_ADMINPLUS
 from .models import Configuration
 
 User = get_user_model()
@@ -76,4 +75,4 @@ def adminplus(request):
         'configuration': configuration,
     }
 
-    return render(request, SILLY_ADMINPLUS['TEMPLATE'], context)
+    return render(request, 'adminplus/adminplus.html', context)

@@ -37,6 +37,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY", 'django-insecure- change this later')
 DEBUG = str(os.environ.get('DEBUG')) == "1"
 
 ALLOWED_HOSTS = ['127.0.0.1']
+
 if DEBUG:
     ALLOWED_HOSTS += [os.environ.get('ALLOWED_HOST')]
 
@@ -204,8 +205,4 @@ SILLY_STRIPE = {
     'PORTAL_BACK_URL': 'http://localhost:8080/?#/account',
     'PRINT_DEV_LOGS': False,
 
-}
-
-SILLY_ADMINPLUS = {
-    'USE_ADMINPLUS_APP': True,
 }
