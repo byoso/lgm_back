@@ -37,8 +37,7 @@ server {
 
 
     location /app {
-        alias                       /home/byoso/backend/dist;
-        try_files $uri $uri/ /index.html;
+        try_files $uri $uri/ /vol/static/static/index.html;
 
     }
 
