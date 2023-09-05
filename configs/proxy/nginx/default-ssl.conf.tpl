@@ -26,6 +26,7 @@ server {
 
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
 
+
     location /static {
         alias /vol/static/static;
     }
@@ -36,9 +37,8 @@ server {
 
 
     location / {
-        root                        /vol/static/static;
-        index                       index.html;
-        try_files                   $uri $uri/ /index.html;
+        alias                       /home/byoso/backend/dist;
+        try_files $uri $uri/ /index.html;
 
         uwsgi_pass                  ${APP_HOST}:${APP_PORT};
         include                     /etc/nginx/uwsgi_params;
