@@ -36,10 +36,13 @@ server {
     }
 
 
-    location / {
+    location /app {
         alias                       /home/byoso/backend/dist;
         try_files $uri $uri/ /index.html;
 
+    }
+
+    location / {
         uwsgi_pass                  ${APP_HOST}:${APP_PORT};
         include                     /etc/nginx/uwsgi_params;
         client_max_body_size        ${MAX_UPLOAD_SIZE}M;
