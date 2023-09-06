@@ -36,11 +36,6 @@ server {
     }
 
 
-    location /app {
-        try_files $uri $uri/ /vol/static/static/index.html;
-
-    }
-
     location / {
         uwsgi_pass                  ${APP_HOST}:${APP_PORT};
         include                     /etc/nginx/uwsgi_params;

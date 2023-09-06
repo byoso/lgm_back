@@ -210,7 +210,7 @@ EMAIL_PORT = os.environ.get('EMAIL_PORT', "25")
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', "email@email.com")
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', "testpass1")
-EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', '0') == '1'
+EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', '0') == '1'
 
 AUTH_USER_MODEL = '_users.User'
 
@@ -222,8 +222,13 @@ SILLY_AUTH = {
         'password', 'is_superuser', 'is_staff', 'is_active', 'new_email',
         'groups', 'user_permissions', 'last_login', 'is_confirmed',
         'first_name', 'last_name',
-    ]
+    ],
+    "EMAIL_TERMINAL_PRINT": os.environ.get('EMAIL_IS_CONFIGURED', '0') == '0',
 }
+
+if not DEBUG:
+    SILLY_AUTH['API_EMAIL_LOGIN_LINK'] = "http://rpgadventure.eu/?#/login_from_email/"
+
 
 SILLY_STRIPE = {
     'AUTO_SET': 'SPA',  # 'CLASSIC' or 'SPA'
