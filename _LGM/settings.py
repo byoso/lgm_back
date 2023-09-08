@@ -216,6 +216,7 @@ AUTH_USER_MODEL = '_users.User'
 
 SILLY_AUTH = {
     "SITE_NAME": "RPGAdventure.eu",
+    "DSA_PREFIX": "",
     "AUTO_SET": "API",
     "API_EMAIL_LOGIN_LINK": "http://localhost:8080/?#/login_from_email/",
     "USER_INFOS_EXCLUDE": [
@@ -232,6 +233,7 @@ if not DEBUG:
 
 SILLY_STRIPE = {
     'AUTO_SET': 'SPA',  # 'CLASSIC' or 'SPA'
+    'DSS_PREFIX': '',
     'USE_SUBSCRIPTIONS_CANCEL': False,
     'USE_CHECKOUT': False,  # custom checkout instead
     'DSS_SECRET_KEY': os.environ.get('DSS_SECRET_KEY'),
