@@ -37,7 +37,7 @@ server {
 
 
     location / {
-        try_files $uri /vol/static/dist/index.html
+        try_files        uri/ $uri /vol/static/static/dist/index.html;
         uwsgi_pass                  ${APP_HOST}:${APP_PORT};
         include                     /etc/nginx/uwsgi_params;
         client_max_body_size        ${MAX_UPLOAD_SIZE}M;
