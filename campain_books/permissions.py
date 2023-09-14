@@ -1,10 +1,16 @@
 from rest_framework import permissions
+from _adminplus.models import Configuration
 
 
 class IsSubscriber(permissions.BasePermission):
 
     def has_permission(self, request, view):
-        return request.user.is_subscriber
+        response = False
+        if Configuration.objects.first().active_stripe_subscriptions:
+            response = request.user.is_subscriber
+        if Configuration.objects.first().active_tip_me:
+            response = True
+        return response
 
 
 class IsOwner(permissions.BasePermission):
