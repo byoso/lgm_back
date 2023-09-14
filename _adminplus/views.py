@@ -58,10 +58,10 @@ def adminplus(request):
     if request.method == 'POST':
         print("=== request.POST - open_subscriptions: ", request.POST.get('open_subscriptions'))
         configuration = Configuration.objects.first()
-        if request.POST.get('open_subscriptions') == "on":  # checkbox returns "on" or None
-            configuration.open_subscriptions = True
-        else:
-            configuration.open_subscriptions = False
+        configuration.open_subscriptions = request.POST.get('open_subscriptions') == "on"
+        configuration.active_stripe_subscriptions = request.POST.get('active_stripe_subscriptions') == "on"
+        configuration.active_stripe_portal = request.POST.get('active_stripe_portal') == "on"
+        configuration.active_tip_me = request.POST.get('active_tip_me') == "on"
         configuration.save()
 
         messages.add_message(

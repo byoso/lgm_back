@@ -6,6 +6,9 @@ class Configuration(models.Model):
     """Config usable for your app, change it to your liking."""
     # just an example (usefull for me):
     open_subscriptions = models.BooleanField(default=False)
+    active_stripe_subscriptions = models.BooleanField(default=False)
+    active_stripe_portal = models.BooleanField(default=False)
+    active_tip_me = models.BooleanField(default=False)
 
     # Add your settings here
 

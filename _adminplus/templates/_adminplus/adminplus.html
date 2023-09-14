@@ -71,14 +71,36 @@
       <form method="post">
         {% csrf_token %}
         <div class="inline">
-            open subscriptions:
-
           <input type="checkbox" name="open_subscriptions"
           {% if configuration.open_subscriptions%}
            checked
           {% endif %}
            >
-
+           active Sign Up (open_subscriptions)
+        </div>
+        <div>
+          <input type="checkbox" name="active_stripe_subscriptions"
+          {% if configuration.active_stripe_subscriptions%}
+           checked
+          {% endif %}
+          >
+          active_stripe_subscriptions
+        </div>
+        <div>
+          <input type="checkbox" name="active_stripe_portal"
+          {% if configuration.active_stripe_portal%}
+           checked
+          {% endif %}
+          >
+          active_stripe_portal
+        </div>
+        <div>
+          <input type="checkbox" name="active_tip_me"
+          {% if configuration.active_tip_me%}
+           checked
+          {% endif %}
+          >
+          active_tip_me
         </div>
 
         <input type="submit" value="confirm" class="button is-success is-light mt-2">
