@@ -7,7 +7,6 @@ User = get_user_model()
 
 config = AdminplusConfig.objects.first()
 
-
 class UserSerializer(serializers.ModelSerializer):
     is_subscriber = serializers.SerializerMethodField()
     class Meta:
@@ -21,7 +20,11 @@ class UserSerializer(serializers.ModelSerializer):
         ]
 
     def get_is_subscriber(self, obj):
-        if config.active_stripe_subscriptions:
-            return obj.is_subscriber
-        else:
+        try:
+            if config.active_stripe_subscriptions:
+                return obj.is_subscriber
+            else:
+                return True
+        except Exception as e:
+            print("==== exception:", e)
             return True
