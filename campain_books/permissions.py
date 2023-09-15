@@ -5,12 +5,8 @@ from _adminplus.models import Configuration
 class IsSubscriber(permissions.BasePermission):
 
     def has_permission(self, request, view):
-        response = False
-        if Configuration.objects.first().active_stripe_subscriptions:
-            response = request.user.is_subscriber
-        if Configuration.objects.first().active_tip_me:
-            response = True
-        return response
+        return Configuration.active_stripe_subscriptions or \
+            Configuration.active_tip_me
 
 
 class IsOwner(permissions.BasePermission):

@@ -55,30 +55,13 @@ def adminplus(request):
     if not request.user.is_superuser or not request.user.is_active:
         return redirect('admin:index')
 
-    if request.method == 'POST':
-        print("=== request.POST - open_subscriptions: ", request.POST.get('open_subscriptions'))
-        configuration = Configuration.objects.first()
-        configuration.open_subscriptions = request.POST.get('open_subscriptions') == "on"
-        configuration.active_stripe_subscriptions = request.POST.get('active_stripe_subscriptions') == "on"
-        configuration.active_stripe_portal = request.POST.get('active_stripe_portal') == "on"
-        configuration.active_tip_me = request.POST.get('active_tip_me') == "on"
-        configuration.save()
-
-        messages.add_message(
-            request,
-            messages.SUCCESS,
-            message="Configuration updated successfully",
-            extra_tags="success")
-
-    configuration = Configuration.objects.first()
-
     script_name = request.META["SCRIPT_NAME"]
     site_url = "/"
     site_url = (
         script_name if site_url == "/" and script_name else site_url
         )
     context = {
-        'configuration': configuration,
+        'configuration': Configuration,
         'site_url': site_url,
     }
 

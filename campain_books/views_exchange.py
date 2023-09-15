@@ -26,7 +26,7 @@ from .serializers_collections import (
 from .serializers import (
     CampainItemsSerializer,
 )
-from subscriptions.permissions import IsSubscriber
+from .permissions import IsSubscriber
 
 
 class exchangesLoading(GenericAPIView):

@@ -31,7 +31,8 @@ from .serializers_collections import (
     CollectionPCSerializer
     )
 
-from subscriptions.permissions import IsSubscriber
+from .permissions import IsSubscriber
+from .helpers import is_subscriber
 
 
 class SharedCollections(GenericAPIView):
@@ -89,8 +90,6 @@ def create_campain_from_collection(request):
     requires collection_id, table_id and some datas
     """
     user = request.user
-    if not user.is_subscriber:
-        return Response({'message': 'you need to be a subscriber'}, 403)
     if not Collection.objects.filter(id=request.data['collection_id']).exists():
         return Response({'message': 'collection_id is required'}, 400)
     collection = Collection.objects.get(id=request.data['collection_id'])
@@ -156,7 +155,7 @@ def favorite_collection(request):
         serializer = CollectionsSerializer(collections, many=True, context={'request': request})
         return Response(serializer.data)
     elif request.method == 'POST':
-        if not request.user.is_subscriber:
+        if not is_subscriber(request.user):
             return Response({'message': 'Subscribers only'}, 403)
         collection = Collection.objects.get(id=request.data['collection_id'])
         if collection.fav_users.filter(id=user.id).exists():
@@ -175,11 +174,11 @@ def favorite_collection(request):
 
 
 @api_view(['POST', 'GET', 'DELETE', 'PUT'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsSubscriber])
 @transaction.atomic
 def collections_crud(request):
     if request.method == 'POST':
-        if not request.user.is_subscriber:
+        if not is_subscriber(request.user):
             return Response({'message': 'Subscribers only'}, 403)
         user = request.user
         date_now = date.today()
@@ -221,7 +220,7 @@ def collections_crud(request):
         return Response({'message': 'ressource deleted'}, status=200)
 
     if request.method == 'PUT':
-        if not request.user.is_subscriber:
+        if not is_subscriber(request.user):
             return Response({'message': 'Subscribers only'}, 403)
         if 'id' not in request.data:
             return Response({'message': 'id is required'}, status=400)

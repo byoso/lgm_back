@@ -10,6 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ValidationError
 from rest_framework import viewsets
 
+from _adminplus.models import Configuration
 from .models import (
     Table,
     Campain,
@@ -30,7 +31,7 @@ from .serializers_collections import (
 from .permissions import IsOwner, IsGuestOrOwner
 from .helpers import guests_create_or_not, is_game_master, is_player
 
-from subscriptions.permissions import IsSubscriber
+from .permissions import IsSubscriber
 
 User = get_user_model()
 
@@ -90,7 +91,7 @@ class TableViewSet(viewsets.ModelViewSet):
 
     @transaction.atomic
     def perform_create(self, serializer):
-        if not self.request.user.is_subscriber:
+        if not self.request.user.is_subscriber and Configuration.active_stripe_subscriptions:
             return Response({"message": "Subscriber only"}, 403)
         if serializer.is_valid():
             table = serializer.save()
@@ -106,7 +107,7 @@ class TableViewSet(viewsets.ModelViewSet):
 
     @transaction.atomic
     def perform_update(self, serializer):
-        if not self.request.user.is_subscriber:
+        if not self.request.user.is_subscriber and Configuration.active_stripe_subscriptions:
             return Response({"message": "Subscriber only"}, 403)
         if serializer.is_valid():
             table = serializer.save()
@@ -169,9 +170,8 @@ class CampainViewSet(viewsets.ViewSet):
     """Handle actions on campains"""
 
     @transaction.atomic
+    @permission_classes([IsAuthenticated, IsSubscriber])
     def create(self, request):
-        if not request.user.is_subscriber:
-            return Response({"message": "Subscriber only"}, 403)
         message = (
             "Invalid form, be sure the title, the "
             "description, and the charater names do not exceed "
@@ -245,7 +245,7 @@ def update_campain(request):
     if 'is_ended' in request.data:
         campain.is_ended = request.data['is_ended']
     if 'description' in request.data:
-        campain.description = request.data['description'].strip()
+        campain.description = request.data['description']
     if 'image_url' in request.data:
         campain.image_url = request.data['image_url']
     if 'is_copy_free' in request.data and campain.is_copy_free:
@@ -283,7 +283,7 @@ def create_item(request):
         locked = False
         date_unlocked = datetime.now()
 
-    if request.user.is_subscriber:
+    if request.user.is_subscriber or not Configuration.active_stripe_subscriptions:
         item_type = request.data['type']
     else:
         item_type = "MEMO"

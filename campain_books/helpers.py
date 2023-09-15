@@ -9,9 +9,14 @@ from django_silly_auth.config import SILLY_AUTH_SETTINGS as conf
 
 from .models import PlayerCharacter, Campain, Collection
 
+from _adminplus.models import Configuration
 
 User = get_user_model()
 
+def is_subscriber(user):
+    """Check if a user is a subscriber"""
+
+    return user.is_subscriber or Configuration.active_tip_me
 
 def is_game_master(user, campain):
     """Check if a user is a GM of a campain"""
