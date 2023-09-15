@@ -24,4 +24,5 @@ urlpatterns = [
     path('dss/', include('django_silly_stripe.urls')),
     path('campains/', include('campain_books.urls')),
     path('home/', include('home.urls')),
+    path('users/', include('_users.urls')),
 ]
