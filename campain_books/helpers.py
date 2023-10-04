@@ -7,7 +7,7 @@ from django.conf import settings
 from django_silly_auth.utils import dsa_send_mail
 from django_silly_auth.config import SILLY_AUTH_SETTINGS as conf
 
-from .models import PlayerCharacter, Campain, Collection
+from .models import PlayerCharacter
 
 from _adminplus.models import Configuration
 
@@ -50,9 +50,9 @@ def guests_create_or_not(
         *args, **kwargs
         ):
     """Used on creation and update of a table to create the needed guests"""
-
     # add needed guests
     for guest_email in guests_list:
+        guest_email = guest_email.strip()
         if not User.objects.filter(email=guest_email).exists():
             if "@" not in guest_email or len(guest_email) < 5:
                 message += f"Impossible to create this guest: {guest_email}.\n"
@@ -67,7 +67,7 @@ def guests_create_or_not(
                 jwt_token = guest.get_jwt_token()
                 context = {
                     'user': guest,
-                    'link': conf['SPA_EMAIL_LOGIN_LINK'] + jwt_token,
+                    'link': conf['API_EMAIL_LOGIN_LINK'] + jwt_token,
                     'password': password,
                     'site_name': conf["SITE_NAME"],
                     'table_host_name': request.user.username,
@@ -80,27 +80,29 @@ def guests_create_or_not(
                     print(msg_text.render(context))
 
                 dsa_send_mail(
-                    'Password reset request',
+                    'RPGAdventure.eu invitation',
                     msg_text.render(context),
                     settings.EMAIL_HOST_USER,
                     [guest.email],
                     fail_silently=False,
                 )
+
             except Exception as e:
                 message += f"Impossible to create this guest: {guest_email}.\n"
                 print(e)
 
         else:
+            if request.user.email == guest_email:
+                message += "Impossible to invite yourself.\n"
+                continue
             guest = User.objects.get(email=guest_email)
         table.guests.add(guest)
-        # DELETE add_table_guest(table, guest)
 
     # remove unneeded guests
     for guest in table.guests.all():
 
         if guest.email not in guests_list:
             remove_table_guest(table, guest)
-    # print("message: ", message)
     return serializer.data
 
 

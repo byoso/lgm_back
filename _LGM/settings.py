@@ -122,7 +122,7 @@ if os.environ.get('USE_POSTGRES', '1') == '1':
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': os.environ.get('POSTGRES_DB', 'django_pg_db'),
-            'USER': os.environ.get('POSTGRES_USER', 'postgres'),
+            'USER': os.environ.get('POSTGRES_USER', 'wrong_user_env_issue'),
             'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'postgres'),
             'HOST': os.environ.get('POSTGRES_HOST', 'db'),
             'PORT': os.environ.get('POSTGRES_PORT', '5432'),
@@ -216,6 +216,7 @@ AUTH_USER_MODEL = '_users.User'
 
 SILLY_AUTH = {
     "SITE_NAME": "RPGAdventure.eu",
+    "DELETE_UNCONFIRMED_TIME": 0,
     "DSA_PREFIX": "",
     "AUTO_SET": "API",
     "API_EMAIL_LOGIN_LINK": "http://localhost:8080/?#/login_from_email/",
@@ -224,7 +225,7 @@ SILLY_AUTH = {
         'groups', 'user_permissions', 'last_login', 'is_confirmed',
         'first_name', 'last_name',
     ],
-    "EMAIL_TERMINAL_PRINT": os.environ.get('EMAIL_IS_CONFIGURED', '0') == '0',
+    "EMAIL_TERMINAL_PRINT": os.environ.get('EMAIL_TERMINAL_PRINT', '0') == '1',
 }
 
 if not DEBUG:
