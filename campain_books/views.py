@@ -471,6 +471,7 @@ def switch_end_campain(request):
         return Response({"message": "Game Master or owner only !"}, status=403)
 
     campain.is_ended = not campain.is_ended
+    print("=== campain.is_ended: ", campain.is_ended)
     campain.save()
 
     return Response({"message": "campain modified"})
