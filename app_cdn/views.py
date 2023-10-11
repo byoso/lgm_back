@@ -1,13 +1,13 @@
 import os
 import shutil
 
-from django.shortcuts import render, redirect
-from .forms import ProjectForm, ItemForm, ItemEditForm
-from .models import Project, Item
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import user_passes_test
 from django.conf import settings
 from django.views.decorators.http import require_http_methods
 
+from .forms import ProjectForm, ItemForm, ItemEditForm
+from .models import Project, Item
 
 @user_passes_test(lambda u: u.is_superuser)
 def home(request):
@@ -47,7 +47,7 @@ def new_project(request):
 
 @user_passes_test(lambda u: u.is_superuser)
 def project(request, project_id):
-    project = Project.objects.get(pk=project_id)
+    project = get_object_or_404(Project, pk=project_id)
     items = Item.objects.filter(project=project)
     absolute_url = request.build_absolute_uri()
     context = {
@@ -60,7 +60,7 @@ def project(request, project_id):
 
 @user_passes_test(lambda u: u.is_superuser)
 def edit_project(request, project_id):
-    project = Project.objects.get(pk=project_id)
+    project = get_object_or_404(Project, pk=project_id)
     if request.method == 'POST':
         form = ProjectForm(request.POST)
         if form.is_valid():
@@ -102,7 +102,7 @@ def edit_project(request, project_id):
 @user_passes_test(lambda u: u.is_superuser)
 @require_http_methods(['POST'])
 def delete_project(request, project_id):
-    project = Project.objects.get(pk=project_id)
+    project = get_object_or_404(Project, pk=project_id)
     if os.path.exists(os.path.join(settings.MEDIA_ROOT, project.name)):
         shutil.rmtree(os.path.join(settings.MEDIA_ROOT, project.name))
     project.delete()
@@ -115,7 +115,7 @@ def delete_project(request, project_id):
 
 @user_passes_test(lambda u: u.is_superuser)
 def new_item(request, project_id):
-    project = Project.objects.get(pk=project_id)
+    project = get_object_or_404(Project, pk=project_id)
     if request.method == 'POST':
         form = ItemForm(request.POST, request.FILES)
         if form.is_valid():
@@ -137,7 +137,7 @@ def new_item(request, project_id):
 
 @user_passes_test(lambda u: u.is_superuser)
 def edit_item(request, item_id):
-    item = Item.objects.get(pk=item_id)
+    item = get_object_or_404(Item, pk=item_id)
     project = item.project
     if request.method == 'POST':
         form = ItemEditForm(request.POST, request.FILES)
@@ -166,7 +166,7 @@ def edit_item(request, item_id):
 @user_passes_test(lambda u: u.is_superuser)
 @require_http_methods(['POST'])
 def delete_item(request, item_id):
-    item = Item.objects.get(pk=item_id)
+    item = get_object_or_404(Item, pk=item_id)
     project = item.project
     if os.path.exists(os.path.join(settings.MEDIA_ROOT, item.file.name)):
         os.remove(os.path.join(settings.MEDIA_ROOT, item.file.name))

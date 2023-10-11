@@ -3,6 +3,7 @@ import uuid
 from django.contrib.auth import get_user_model
 from django.template.loader import get_template
 from django.conf import settings
+from django.shortcuts import get_object_or_404
 
 from django_silly_auth.utils import dsa_send_mail
 from django_silly_auth.config import SILLY_AUTH_SETTINGS as conf
@@ -35,7 +36,7 @@ def remove_table_guest(table, guest):
     for campain in table.table_campains.all():
         print(f"remove {guest.username} from {campain.title}")
         if campain.pcs.filter(user=guest).exists():
-            pc = PlayerCharacter.objects.get(user=guest, campain=campain)
+            pc = get_object_or_404(PlayerCharacter, user=guest, campain=campain)
             campain.pcs.remove(pc)
             campain.save()
             pc.delete()
@@ -95,7 +96,7 @@ def guests_create_or_not(
             if request.user.email == guest_email:
                 message += "Impossible to invite yourself.\n"
                 continue
-            guest = User.objects.get(email=guest_email)
+            guest = get_object_or_404(User, email=guest_email)
         table.guests.add(guest)
 
     # remove unneeded guests

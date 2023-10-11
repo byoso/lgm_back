@@ -3,6 +3,7 @@ from datetime import datetime
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.db import transaction
+from django.shortcuts import get_object_or_404
 
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -73,7 +74,7 @@ def dashboard(request):
 @permission_classes([IsAuthenticated])
 def get_table_datas(request):
     if Table.objects.filter(id=request.GET.get('table_id')).exists():
-        table = Table.objects.get(id=request.GET.get('table_id'))
+        table = get_object_or_404(Table, id=request.GET.get('table_id'))
         serializer = TableSerializer(table)
         return Response(serializer.data)
     raise ValidationError("This table does not exists")
@@ -129,8 +130,8 @@ class TableViewSet(viewsets.ModelViewSet):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated, IsOwner])
 def switch_guest_GM(request):
-    table = Table.objects.get(id=request.data.get('table_id'))
-    user = User.objects.get(id=request.data.get('user_id'))
+    table = get_object_or_404(Table, id=request.data.get('table_id'))
+    user = get_object_or_404(User, id=request.data.get('user_id'))
     message = ""
     if user in table.game_masters.all():
         table.game_masters.remove(user)
@@ -149,8 +150,8 @@ def switch_guest_GM(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated, IsOwner])
 def switch_GM_owner(request):
-    table = Table.objects.get(id=request.data.get('table_id'))
-    user = User.objects.get(id=request.data.get('user_id'))
+    table = get_object_or_404(Table, id=request.data.get('table_id'))
+    user = get_object_or_404(User, id=request.data.get('user_id'))
     message = ""
     if user in table.owners.all() and table.owners.count() > 1:
         table.owners.remove(user)
@@ -182,7 +183,7 @@ class CampainViewSet(viewsets.ViewSet):
             game=request.data['game'].strip(),
             image_url=request.data['image_url'],
             language=request.data['language'],
-            table=Table.objects.get(id=request.data['table_id']),
+            table=get_object_or_404(Table, id=request.data['table_id']),
             description=request.data['description'].strip(),
             game_master=request.user,
             )
@@ -194,14 +195,14 @@ class CampainViewSet(viewsets.ViewSet):
         return Response({"message": "Campain created"})
 
     def destroy(self, request, pk=None):
-        campain = Campain.objects.get(id=pk)
+        campain = get_object_or_404(Campain, id=pk)
         if not is_game_master(request.user, campain):
             return Response({"message": "Subscriber only"}, 403)
         campain.delete()
         return Response({"message": "Campain deleted"})
 
     def retrieve(self, request, pk=None):
-        campain = Campain.objects.get(id=pk)
+        campain = get_object_or_404(Campain, id=pk)
         campain_serializer = CampainItemsSerializer(campain, context={'request': request})
         datas = {
             'campain': campain_serializer.data,
@@ -222,7 +223,7 @@ def update_campain(request):
     """At least a campain id must be provided in the request data"""
     try:
         id = request.data['campain_id']
-        campain = Campain.objects.get(id=id)
+        campain = get_object_or_404(Campain, id=id)
     except Campain.DoesNotExist:
         raise ValidationError("This campain does not exists")
     if not is_game_master(request.user, campain):
@@ -260,7 +261,7 @@ def update_campain(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated, IsOwner])
 def get_campains_for_table(request):
-    table = Table.objects.get(id=request.GET.get('table_id'))
+    table = get_object_or_404(Table, id=request.GET.get('table_id'))
     campains = table.table_campains.all()
     serializer = CampainSerializer(campains, many=True, context={'request': request})
     return Response(serializer.data)
@@ -290,7 +291,7 @@ def create_item(request):
 
     item = Item(
         name=request.data['title'].strip(),
-        campain=Campain.objects.get(id=request.data['campainId']),
+        campain=get_object_or_404(Campain, id=request.data['campainId']),
         image_url=request.data['image_url'],
         type=item_type,
         data_pc=request.data['pcsInfos'].strip(),
@@ -312,8 +313,8 @@ def update_item(request):
     """
 
     try:
-        item = Item.objects.get(id=request.data['id'])
-        campain = Campain.objects.get(id=item.campain.id)
+        item = get_object_or_404(Item, id=request.data['id'])
+        campain = get_object_or_404(Campain, id=item.campain.id)
     except Item.DoesNotExist or campain.DoesNotExist:
         return Response({"message": "Ressource does not exist"}, status=400)
     # only the game master can update a not 'MEMO' item, or a locked item.
@@ -356,8 +357,8 @@ def delete_item(request):
     Deletes the item, returns a message.
     """
     try:
-        item = Item.objects.get(id=request.data['id'])
-        campain = Campain.objects.get(id=item.campain.id)
+        item = get_object_or_404(Item, id=request.data['id'])
+        campain = get_object_or_404(Campain, id=item.campain.id)
     except Item.DoesNotExist or campain.DoesNotExist:
         return Response({"message": "Ressource does not exist"}, status=400)
     # only the game master can delete a not 'MEMO' item
@@ -382,12 +383,12 @@ def create_pc(request):
         return Response({"message": "You must choose a campain"}, status=400)
     if request.data['player_id'] != "":
         if User.objects.filter(id=request.data['player_id']).exists():
-            user = User.objects.get(id=request.data['player_id'])
+            user = get_object_or_404(User, id=request.data['player_id'])
         else:
             user = None
     pc = PlayerCharacter(
         name=request.data['name'].strip(),
-        campain=Campain.objects.get(id=request.data['campain_id']),
+        campain=get_object_or_404(Campain, id=request.data['campain_id']),
         image_url=request.data['image_url'],
         data_pc=request.data['data_pc'].strip(),
         data_player=request.data['data_player'].strip(),
@@ -408,8 +409,8 @@ def update_pc(request):
     Updates the pc, returns this pc's datas.
     """
     try:
-        pc = PlayerCharacter.objects.get(id=request.data['id'])
-        campain = Campain.objects.get(id=pc.campain.id)
+        pc = get_object_or_404(PlayerCharacter, id=request.data['id'])
+        campain = get_object_or_404(Campain, id=pc.campain.id)
     except PlayerCharacter.DoesNotExist or campain.DoesNotExist:
         return Response({"message": "Ressource does not exist"}, status=400)
     # only the game master can update a pc
@@ -430,7 +431,7 @@ def update_pc(request):
                 pc.data_gm = request.data['data_gm'].strip()
             if 'player_id' in request.data:
                 if User.objects.filter(id=request.data['player_id']).exists():
-                    pc.user = User.objects.get(id=request.data['player_id'])
+                    pc.user = get_object_or_404(User, id=request.data['player_id'])
                 else:
                     pc.user = None
             if 'locked' in request.data:
@@ -444,8 +445,8 @@ def update_pc(request):
 def delete_pc(request):
     try:
         campain_id = request.data['campain_id']
-        campain = Campain.objects.get(id=campain_id)
-        pc = PlayerCharacter.objects.get(id=request.data['id'])
+        campain = get_object_or_404(Campain, id=campain_id)
+        pc = get_object_or_404(PlayerCharacter, id=request.data['id'])
     except PlayerCharacter.DoesNotExist or Campain.DoesNotExist:
         return Response({"message": "Ressource does not exist"}, status=400)
     if pc.campain.id != campain.id:
@@ -463,7 +464,7 @@ def switch_end_campain(request):
     campain_id = request.data['campain_id']
     table_id = request.data['table_id']
     try:
-        campain = Campain.objects.get(id=campain_id)
+        campain = get_object_or_404(Campain, id=campain_id)
     except Campain.DoesNotExist or Table.DoesNotExist:
         return Response({"message": "Ressource does not exist"}, status=400)
     if not is_game_master(user, campain) and not Table.objects.filter(id=table_id, owners=user).exists():

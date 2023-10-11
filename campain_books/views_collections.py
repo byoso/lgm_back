@@ -2,6 +2,7 @@ from datetime import date
 
 from django.db.models import Q
 from django.db import transaction
+from django.shortcuts import get_object_or_404
 
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -92,7 +93,7 @@ def create_campain_from_collection(request):
     user = request.user
     if not Collection.objects.filter(id=request.data['collection_id']).exists():
         return Response({'message': 'collection_id is required'}, 400)
-    collection = Collection.objects.get(id=request.data['collection_id'])
+    collection = get_object_or_404(Collection, id=request.data['collection_id'])
     if not collection.is_shared and collection.author != user:
         return Response({'message': 'This collection is not shared'}, 403)
     table_id = request.data['table_id']
@@ -103,7 +104,7 @@ def create_campain_from_collection(request):
     campain = Campain.objects.create(
         title=collection.title,
         description=collection.description,
-        table=Table.objects.get(id=table_id),
+        table=get_object_or_404(Table, id=table_id),
         game_master=user,
         # parent_collection=collection,
         is_copy_free=collection.is_copy_free,
@@ -157,14 +158,14 @@ def favorite_collection(request):
     elif request.method == 'POST':
         if not is_subscriber(request.user):
             return Response({'message': 'Subscribers only'}, 403)
-        collection = Collection.objects.get(id=request.data['collection_id'])
+        collection = get_object_or_404(Collection, id=request.data['collection_id'])
         if collection.fav_users.filter(id=user.id).exists():
             return Response({'message': 'already in favs'})
         collection.fav_users.add(user)
         collection.save()
         return Response({'message': 'added to favs'})
     elif request.method == 'DELETE':
-        collection = Collection.objects.get(id=request.data['collection_id'])
+        collection = get_object_or_404(Collection, id=request.data['collection_id'])
         if collection.fav_users.filter(id=user.id).exists():
             collection.fav_users.remove(user)
             collection.save()
@@ -213,7 +214,7 @@ def collections_crud(request):
         id = request.data['id']
         if not Collection.objects.filter(id=id).exists():
             return Response({'message': 'ressource not found'}, status=404)
-        collection = Collection.objects.get(id=id)
+        collection = get_object_or_404(Collection, id=id)
         if collection.author != request.user:
             return Response({'message': 'you are not the owner of this ressource'}, status=403)
         collection.delete()
@@ -227,7 +228,7 @@ def collections_crud(request):
         id = request.data['id']
         if not Collection.objects.filter(id=id).exists():
             return Response({'message': 'ressource not found'}, status=404)
-        collection = Collection.objects.get(id=id)
+        collection = get_object_or_404(Collection, id=id)
         if collection.author != request.user:
             return Response({'message': 'you are not the owner of this ressource'}, status=403)
 
@@ -248,7 +249,7 @@ def collections_crud(request):
             for item_id in items_to_delete:
                 if not CollectionItem.objects.filter(id=item_id).exists():
                     return Response({'message': 'ressource not found'}, status=404)
-                item = CollectionItem.objects.get(id=item_id)
+                item = get_object_or_404(CollectionItem, id=item_id)
                 if item.collection != collection:
                     return Response({'message': 'you are not the owner of this ressource'}, status=403)
                 item.delete()
@@ -258,7 +259,7 @@ def collections_crud(request):
             for item_id in items_to_update:
                 if not CollectionItem.objects.filter(id=item_id).exists():
                     return Response({'message': 'ressource not found'}, status=404)
-                old_item = CollectionItem.objects.get(id=item_id)
+                old_item = get_object_or_404(CollectionItem, id=item_id)
                 if old_item.collection != collection:
                     return Response({'message': 'you are not the owner of this ressource'}, status=403)
                 item = items_to_update[item_id]
@@ -293,7 +294,7 @@ def collections_crud(request):
             for pc_id in pcs_to_delete:
                 if not CollectionPC.objects.filter(id=pc_id).exists():
                     return Response({'message': 'ressource not found'}, status=404)
-                pc = CollectionPC.objects.get(id=pc_id)
+                pc = get_object_or_404(CollectionPC, id=pc_id)
                 if pc.collection != collection:
                     return Response({'message': 'you are not the owner of this ressource'}, status=403)
                 pc.delete()
@@ -303,7 +304,7 @@ def collections_crud(request):
             for pc_id in pcs_to_update:
                 if not CollectionPC.objects.filter(id=pc_id).exists():
                     return Response({'message': 'ressource not found'}, status=404)
-                old_pc = CollectionPC.objects.get(id=pc_id)
+                old_pc = get_object_or_404(CollectionPC, id=pc_id)
                 if old_pc.collection != collection:
                     return Response({'message': 'you are not the owner of this ressource'}, status=403)
                 pc = pcs_to_update[pc_id]
@@ -322,7 +323,7 @@ def collections_crud(request):
                 old_pc.save()
 
         # Handle the collection
-        collection = Collection.objects.get(id=id)
+        collection = get_object_or_404(Collection, id=id)
         serializer = CollectionsSerializer(collection, data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
@@ -339,7 +340,7 @@ def collection_detail(request):
     id = request.GET['id']
     if not Collection.objects.filter(id=id).exists():
         return Response({'message': 'ressource not found'}, status=404)
-    collection = Collection.objects.get(id=id)
+    collection = get_object_or_404(Collection, id=id)
     serializer = CollectionsSerializer(collection, context={'request': request})
     collection_details = serializer.data
 

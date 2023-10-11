@@ -1,5 +1,6 @@
 # from django.db.models import Q
 from django.db import transaction
+from django.shortcuts import get_object_or_404
 
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -77,13 +78,13 @@ class ApplyExchanges(GenericAPIView):
                 )
         try:
             if exchanges['a_type'] == 'campain':
-                source_a = Campain.objects.get(id=exchanges['a_id'])
+                source_a = get_object_or_404(Campain, id=exchanges['a_id'])
             if exchanges['a_type'] == 'collection':
-                source_a = Collection.objects.get(id=exchanges['a_id'])
+                source_a = get_object_or_404(Collection, id=exchanges['a_id'])
             if exchanges['b_type'] == 'campain':
-                source_b = Campain.objects.get(id=exchanges['b_id'])
+                source_b = get_object_or_404(Campain, id=exchanges['b_id'])
             if exchanges['b_type'] == 'collection':
-                source_b = Collection.objects.get(id=exchanges['b_id'])
+                source_b = get_object_or_404(Collection, id=exchanges['b_id'])
         except Campain.DoesNotExist or Collection.DoesNotExist:
             return Response(
                 {'message': 'requested source does not exist'},
@@ -102,9 +103,9 @@ class ApplyExchanges(GenericAPIView):
         for id in exchanges['from_a']['items']:
             try:
                 if a_type == 'campain':
-                    item = Item.objects.get(id=id)
+                    item = get_object_or_404(Item, id=id)
                 if a_type == 'collection':
-                    item = CollectionItem.objects.get(id=id)
+                    item = get_object_or_404(CollectionItem, id=id)
             except CollectionItem.DoesNotExist or Item.DoesNotExist:
                 return Response(
                     {'message': 'requested item does not exist'},
@@ -133,9 +134,9 @@ class ApplyExchanges(GenericAPIView):
         for id in exchanges['from_a']['pcs']:
             try:
                 if a_type == 'campain':
-                    pc = PlayerCharacter.objects.get(id=id)
+                    pc = get_object_or_404(PlayerCharacter, id=id)
                 if a_type == 'collection':
-                    pc = CollectionPC.objects.get(id=id)
+                    pc = get_object_or_404(CollectionPC, id=id)
             except CollectionPC.DoesNotExist or PlayerCharacter.DoesNotExist:
                 return Response(
                     {'message': 'requested pc does not exist'},
@@ -164,9 +165,9 @@ class ApplyExchanges(GenericAPIView):
         for id in exchanges['from_b']['items']:
             try:
                 if b_type == 'campain':
-                    item = Item.objects.get(id=id)
+                    item = get_object_or_404(Item, id=id)
                 if b_type == 'collection':
-                    item = CollectionItem.objects.get(id=id)
+                    item = get_object_or_404(CollectionItem, id=id)
             except CollectionItem.DoesNotExist or Item.DoesNotExist:
                 return Response(
                     {'message': 'requested item does not exist'},
@@ -195,9 +196,9 @@ class ApplyExchanges(GenericAPIView):
         for id in exchanges['from_b']['pcs']:
             try:
                 if b_type == 'campain':
-                    pc = PlayerCharacter.objects.get(id=id)
+                    pc = get_object_or_404(PlayerCharacter, id=id)
                 if b_type == 'collection':
-                    pc = CollectionPC.objects.get(id=id)
+                    pc = get_object_or_404(CollectionPC, id=id)
             except CollectionPC.DoesNotExist or PlayerCharacter.DoesNotExist:
                 return Response(
                     {'message': 'requested pc does not exist'},
