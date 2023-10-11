@@ -1,0 +1,25 @@
+{% extends '_adminplus/adminplus.html' %}
+
+{% block content %}
+
+<div class="container is-max-desktop">
+  <a class="navbar-item" href="{% url 'cdn:project' project_id=project.id %}">
+    <div class="subtitle">>>> {{ project.name }}</div>
+  </a>
+
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    {% if error %}
+    <p style="color: red;">
+      {{ error }}
+    </p>
+    {% endif %}
+    <br>
+
+    <input type="submit" class="button is-success m-2" value="Confirm">
+  </form>
+</div>
+
+{% endblock content %}

@@ -39,6 +39,10 @@
       <div class="navbar-item">
         <a class="title" href="{% url 'adminplus' %}">Admin +</a>
       </div>
+      <div class="navbar-item">
+        <a class="button" href="{% url 'cdn:home' %}">CDN</a>
+      </div>
+
   </nav>
     {% for message in messages %}
       <article class="message is-{{ message.tags }}" onclick="this.remove()">

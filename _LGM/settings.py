@@ -72,6 +72,7 @@ INSTALLED_APPS = [
     'django_silly_adminplus',
 
     # local
+    'app_cdn',
     '_users',
     '_deployment',
     'campain_books',
@@ -247,3 +248,9 @@ SILLY_STRIPE = {
     'PORTAL_BACK_URL': 'http://localhost:8080/?#/account',
     'PRINT_DEV_LOGS': False,
 }
+
+# CDN
+CDN_EXCLUDED_NAMES = [
+    'sitefiles',
+    'sitesfiles',
+]

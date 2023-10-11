@@ -1,0 +1,30 @@
+{% extends '_adminplus/adminplus.html' %}
+
+{% block content %}
+
+<div class="container is-max-desktop">
+  <span>
+    <span class="title">CDN</span>
+    <a href="{% url 'cdn:new_project' %}" class="button is-primary is-pulled-right">+ Project</a>
+  </span>
+  <h2 class="subtitle">Projects</h2>
+
+  {% for project in projects %}
+
+  <a class="box" href="{% url 'cdn:project' project_id=project.id %}">
+    <h1 class="title is-5">{{ project.name }}</h1>
+    <p class="subtitle">{{ project.description }}</p>
+  </a>
+
+  {% endfor %}
+</div>
+
+<style>
+  .box:hover {
+    transform: scale(1.1);
+    transition: transform 0.2s;
+    cursor: pointer;
+  }
+</style>
+
+{% endblock content %}

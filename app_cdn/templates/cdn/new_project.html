@@ -1,0 +1,25 @@
+{% extends '_adminplus/adminplus.html' %}
+
+{% block content %}
+
+<div class="container is-max-desktop">
+  <div class="navbar-item">
+    <div class="subtitle">New project</div>
+  </div>
+
+
+
+  <form action="" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    {% if error %}
+    <p style="color: red;">
+      {{ error }}
+    </p>
+    {% endif %}
+    <br>
+    <input type="submit" class="button is-success m-2" value="Confirm">
+  </form>
+</div>
+
+{% endblock content %}

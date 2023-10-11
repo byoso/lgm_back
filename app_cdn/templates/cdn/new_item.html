@@ -1,0 +1,25 @@
+{% extends '_adminplus/adminplus.html' %}
+
+{% block content %}
+
+<div class="container is-max-desktop">
+  <a href="{% url 'cdn:project' project_id=project.id %}">
+    <div class="box">
+      <div class="title is-4">{{ project.name }}</div>
+    </div>
+  </a>
+  <br>
+
+  <div class="box">
+    <h2 class="subtitle is-5">Item</h2>
+    <a href="{{ item.file.url }}" target="_blank">{{ request.get_host }}{{ item.file.url }}</a>
+    <form action="" method="post" enctype="multipart/form-data">
+
+      {% csrf_token %}
+      {{ form.as_p }}
+      <input type="submit" class="button is-success" value="Save">
+    </form>
+
+  </div>
+</div>
+{% endblock content %}

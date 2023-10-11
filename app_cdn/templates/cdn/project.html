@@ -1,0 +1,116 @@
+{% extends '_adminplus/adminplus.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container is-max-desktop">
+  <a class="navbar-item" href="{% url 'cdn:home' %}">
+    <div class="subtitle">>>> cdn</div>
+  </a>
+  <span>
+    <div class="right">
+      <form action="{% url 'cdn:delete_project' project_id=project.id %}" method="post">
+        {% csrf_token %}
+        <a href="{% url 'cdn:edit_project' project_id=project.id %}" class="button is-primary is-small">Edit</a>
+        <span id="delete" class="button is-warning is-small ml-2">delete</span>
+        <input type="submit" value="Confirm" disabled id="confirm" class="button is-danger is-small ml-2"
+        onclick="confirm_clicked(event);">
+
+      </form>
+    </div>
+
+
+  </span>
+
+  <div class="box mt-2">
+    <div class="title is-4">{{ project.name }}</div>
+    {{ project.description }}
+  </div>
+  <div class="box">
+    <div class="right">
+      <a href="{% url 'cdn:new_item' project_id=project.id %}" class="button is-primary is-small ml-2">
+        + Item
+      </a>
+    </div>
+    <span class="title is-4">Items</span>
+    <br>
+    {% for item in items %}
+
+
+    <div class=" columns">
+      <div class="column ">
+        <div class="columns">
+          <div class="column is-10">
+            <a href="{% url 'cdn:edit_item' item_id=item.id %}">
+              {% if item.description %}
+              <div class="title is-6 item-name">
+                {{ item.description }}
+              </div>
+              {% else %}
+              <div class="title is-6 item-name">
+                {{ item.file.name}}
+              </div>
+              {% endif %}
+            </a>
+          </div>
+          <div class="column is-2">
+            <form action="{% url 'cdn:delete_item' item_id=item.id %}" method="post">
+              {% csrf_token %}
+              <input type="submit" value="X" class="button is-danger is-small">
+            </form>
+          </div>
+        </div>
+
+      </div>
+      <div class="column">
+        <span class="subtitle right mr-2">{{ item.category }}</span>
+        <a href="{{ item.file.url }}" target="_blank">{{ request.get_host }}{{ item.file.url }}</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+  let delete_button = document.getElementById('delete');
+  let confirm_button = document.getElementById('confirm');
+
+  function confirm_clicked(event) {
+    if (confirm_button.hasAttribute('disabled')) {
+      event.preventDefault();
+      return;
+    }
+  }
+
+  delete_button.addEventListener('click', function() {
+    if (confirm_button.hasAttribute('disabled'))
+      confirm_button.removeAttribute('disabled');
+    else
+      confirm_button.setAttribute('disabled', 'disabled');
+  });
+</script>
+
+<style scoped>
+.item-name {
+  border: 1px solid black;
+  border-radius: 5px;
+  padding: 5px;
+}
+.right {
+  text-align: right;
+}
+
+.item-left {
+  display: flex;
+  justify-content: space-between;
+}
+
+.item-name:hover {
+  cursor: pointer;
+  background-color: #b3ffd0;
+}
+
+</style>
+
+
+{% endblock content %}
